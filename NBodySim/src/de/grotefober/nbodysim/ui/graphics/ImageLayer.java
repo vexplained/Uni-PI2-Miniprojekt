@@ -1,4 +1,4 @@
-package de.grtfbr.ui.graphics;
+package de.grotefober.nbodysim.ui.graphics;
 
 import java.awt.image.BufferedImage;
 

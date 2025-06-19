@@ -1,4 +1,4 @@
-package de.grtfbr.ui.graphics;
+package de.grotefober.nbodysim.ui.graphics;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -9,7 +9,7 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-import de.grtfbr.ui.graphics.dynObjects.DynamicObject;
+import de.grotefober.nbodysim.ui.graphics.dynObjects.DynamicObject;
 
 /**
  * @author Levin

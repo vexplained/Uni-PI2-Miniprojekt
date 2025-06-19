@@ -1,12 +1,16 @@
-package de.grtfbr.ui;
+package de.grotefober.nbodysim.ui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
+
+import de.vexplained.libraries.cvs_graphics_library.stdGraphics.DynamicCanvas;
 
 public class MainGUI
 {
@@ -60,14 +64,14 @@ public class MainGUI
 
 		JPanel panelControls = new JPanel();
 		splitPane.setLeftComponent(panelControls);
-		GridBagLayout gbl_panelControls = new GridBagLayout();
-		gbl_panelControls.columnWidths = new int[] { 0 };
-		gbl_panelControls.rowHeights = new int[] { 0 };
-		gbl_panelControls.columnWeights = new double[] { Double.MIN_VALUE };
-		gbl_panelControls.rowWeights = new double[] { Double.MIN_VALUE };
-		panelControls.setLayout(gbl_panelControls);
+		panelControls.setLayout(new GridLayout(1, 0, 0, 0));
 
-		JPanel panelCanvas = new JPanel();
+		JToolBar toolBar = new JToolBar();
+		toolBar.setFocusable(false);
+		toolBar.setOrientation(SwingConstants.VERTICAL);
+		panelControls.add(toolBar);
+
+		DynamicCanvas panelCanvas = new DynamicCanvas();
 		splitPane.setRightComponent(panelCanvas);
 	}
 

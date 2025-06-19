@@ -31,7 +31,8 @@
     - Simulationsgeschwindigkeit / Step einstellbar
         -> wenn noch Zeit: hier ggf. noch zusätzliche Kalkulationen für Kollisionstests: zwischen 2 Positionen jedes
         Punktes wird (endliche) Gerade gezogen; Intersection Test zwischen den Strecken aller Punkte
-        -> falls Intersection Test positiv => collapse bodies
+        ->+ falls Intersection Test positiv => collapse bodies
+    - Hintergrund: anstatt Farbe "Heatmap"/Visualisierung des Gravitationspotentials
 
 # Prioritäten
 1. CanvasController & grundlegende Grafikerzeugung ausschließlich mit Massenpunkt-Rendering. Zunächst vordefinierte

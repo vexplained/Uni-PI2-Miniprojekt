@@ -1,4 +1,4 @@
-package de.grtfbr.ui.graphics.dynObjects;
+package de.grotefober.nbodysim.ui.graphics.dynObjects;
 
 /**
  * @author Levin
