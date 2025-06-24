@@ -29,6 +29,11 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass
 	public abstract void updateAcceleration(Vector2D force);
 
 	/**
+	 * Update this {@code PhysicsObject}'s acceleration using Newton's second law (F = m*a).
+	 */
+	public abstract void updateAcceleration(Vector2D[] forces);
+
+	/**
 	 * Update this {@code PhysicsObject}'s velocity based on its current acceleration using the explicit Euler method
 	 * (<a href="https://en.wikipedia.org/wiki/Euler_method">Wikipedia: Euler method</a>).
 	 * 

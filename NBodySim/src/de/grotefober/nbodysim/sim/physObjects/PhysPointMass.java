@@ -25,15 +25,23 @@ public class PhysPointMass extends PhysicsObject
 	@Override
 	public Vector2D calcAcceleration(Vector2D force)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return force.scale(getMass());
 	}
 
 	@Override
 	public void updateAcceleration(Vector2D force)
 	{
-		// TODO Auto-generated method stub
+		this.setAcceleration(calcAcceleration(force));
+	}
 
+	@Override
+	public void updateAcceleration(Vector2D[] forces)
+	{
+		Vector2D.Double.Mutable forceResult = new Vector2D.Double.Mutable();
+		for (Vector2D force : forces)
+		{
+			forceResult.add(force);
+		}
 	}
 
 	@Override

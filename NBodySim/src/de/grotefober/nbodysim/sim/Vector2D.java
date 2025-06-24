@@ -10,6 +10,10 @@ public abstract class Vector2D implements Cloneable
 	/**
 	 * The {@code Double} class defines a vector specified in
 	 * {@code double} precision.
+	 * <br>
+	 * Math operations do not modify the initial Vector2D object itself (treated as immutable). Instead, the result of
+	 * the operation is returned. This results in larger computation overhead as new instances of vectors are created
+	 * for every operation.
 	 */
 	public static class Double extends Vector2D implements Serializable
 	{
@@ -20,14 +24,101 @@ public abstract class Vector2D implements Cloneable
 		 *
 		 * @serial
 		 */
-		public double x;
+		protected double x;
 
 		/**
 		 * The Y coordinate of this {@code Vector2D}.
 		 *
 		 * @serial
 		 */
-		public double y;
+		protected double y;
+
+		/**
+		 * Variant of {@link Vector2D} with mutable math operations.
+		 */
+		public static class Mutable extends Vector2D.Double implements Serializable
+		{
+			private static final long serialVersionUID = -8390146820436311931L;
+
+			/**
+			 * Constructs and initializes a {@code Vector2D} with
+			 * coordinates (0,&nbsp;0).
+			 */
+			public Mutable()
+			{
+				super();
+			}
+
+			/**
+			 * Constructs and initializes a {@code Vector2D} with the
+			 * specified coordinates.
+			 *
+			 * @param x
+			 *            the X coordinate of the newly
+			 *            constructed {@code Vector2D}
+			 * @param y
+			 *            the Y coordinate of the newly
+			 *            constructed {@code Vector2D}
+			 */
+			public Mutable(double x, double y)
+			{
+				super(x, y);
+			}
+
+			/**
+			 * Adds the vector <code>addend</code> to this vector.
+			 * 
+			 * @param addend
+			 *            the vector to add to this vector
+			 * @return this object
+			 */
+			@Override
+			public Vector2D add(Vector2D addend)
+			{
+				this.setLocation(this.getX() + addend.getX(), this.getY() + addend.getY());
+				return this;
+			}
+
+			/**
+			 * Subtracts the vector <code>subtrahend</code> from this vector.
+			 * 
+			 * @param subtrahend
+			 *            the vector to subtract from this vector
+			 * @return this object
+			 */
+			@Override
+			public Vector2D subtract(Vector2D subtrahend)
+			{
+				this.setLocation(this.getX() - subtrahend.getX(), this.getY() - subtrahend.getY());
+				return this;
+			}
+
+			/**
+			 * Scales this vector by <code>scalar</code>.
+			 * 
+			 * @param scalar
+			 *            the amount to scale this vector by.
+			 * @return this object
+			 */
+			@Override
+			public Vector2D scale(double scalar)
+			{
+				this.setLocation(this.getX() * scalar, this.getY() * scalar);
+				return this;
+			}
+
+			/**
+			 * Normalizes this vector to a length of one.
+			 * 
+			 * @return this object.
+			 */
+			@Override
+			public Vector2D norm()
+			{
+				this.scale(1d / this.getMagnitude());
+				return this;
+			}
+		}
 
 		/**
 		 * Constructs and initializes a {@code Vector2D} with
@@ -293,7 +384,8 @@ public abstract class Vector2D implements Cloneable
 	/**
 	 * Calculates the sum of this vector plus the <code>addend</code>.
 	 * <br>
-	 * This vector instance itself is not modified.
+	 * If this instance is not a subclass of {@link Vector2D.Double.Mutable}, this instance is not
+	 * modified.
 	 * 
 	 * @return <code>this + addend</code>
 	 */
@@ -302,16 +394,18 @@ public abstract class Vector2D implements Cloneable
 	/**
 	 * Calculates the difference of this vector minus the <code>subtrahend</code>.
 	 * <br>
-	 * This vector instance itself is not modified.
+	 * If this instance is not a subclass of {@link Vector2D.Double.Mutable}, this instance is not
+	 * modified.
 	 * 
 	 * @return <code>this - subtrahend</code>
 	 */
 	public abstract Vector2D subtract(Vector2D subtrahend);
 
 	/**
-	 * Calculates the scaled version of this vector .
+	 * Calculates the scaled version of this vector.
 	 * <br>
-	 * This vector instance itself is not modified.
+	 * If this instance is not a subclass of {@link Vector2D.Double.Mutable}, this instance is not
+	 * modified.
 	 * 
 	 * @return <code>scalar * this</code>
 	 */
@@ -320,7 +414,8 @@ public abstract class Vector2D implements Cloneable
 	/**
 	 * Calculates the dot product of this and <code>other</code> vector. The dot product is commutative.
 	 * <br>
-	 * This vector instance itself is not modified.
+	 * If this instance is not a subclass of {@link Vector2D.Double.Mutable}, this instance is not
+	 * modified.
 	 * 
 	 * @return <code>this \u22c5 other</code>
 	 */
@@ -329,7 +424,8 @@ public abstract class Vector2D implements Cloneable
 	/**
 	 * Calculates the normalized version of this vector.
 	 * <br>
-	 * This vector instance itself is not modified.
+	 * If this instance is not a subclass of {@link Vector2D.Double.Mutable}, this instance is not
+	 * modified.
 	 * 
 	 * @return <code>this / |this|</code>
 	 */
