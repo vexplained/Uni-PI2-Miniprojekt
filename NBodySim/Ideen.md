@@ -42,3 +42,7 @@
     - UI bauen
     - Körper hinzufügen
     - Kamera bewegen
+    
+
+## Wenn die Zeit reicht:
+- Explizites Euler-Verfahren durch anderes Verfahren ersetzen, z. B. https://en.wikipedia.org/wiki/Predictor%E2%80%93corrector_method

@@ -28,13 +28,14 @@ public class DynamicCanvas extends JPanel
 	public DynamicCanvas()
 	{
 		this(DEFAULT_COLOR_BG);
-		this.objects = Collections.synchronizedSet(new HashSet<DynamicObject>()); // Using set instead of list to
-																					 // prevent duplicates
 	}
 
 	public DynamicCanvas(Color bgColor)
 	{
 		this.bgColor = bgColor;
+
+		this.objects = Collections.synchronizedSet(new HashSet<DynamicObject>()); // Using set instead of list to
+		// prevent duplicates
 	}
 
 	/**

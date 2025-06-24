@@ -1,7 +1,18 @@
 package de.grotefober.nbodysim.sim;
 
+import java.util.ArrayList;
+
+// TODO: Refactor to record (performance improvement? Smaller instantiation overhead)
 public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass
 {
+
+	/**
+	 * Contains all {@link PhysicsObject}s of this' object's parent universe.
+	 * <br>
+	 * FIXME: Perhaps refactor to contain only reference to parent container / PhysicsController -> reduce duplicate
+	 * memory (same List for every object)
+	 */
+	protected ArrayList<PhysicsObject> parentUniverse;
 
 	/**
 	 * The mass of this {@code PhysicsObject}
@@ -37,6 +48,15 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass
 	 * Update this {@code PhysicsObject}'s velocity based on its current acceleration using the explicit Euler method
 	 * (<a href="https://en.wikipedia.org/wiki/Euler_method">Wikipedia: Euler method</a>).
 	 * 
+	 * TODO: Perhaps refactor to use more accurate approximation, e.g. predictor-corrector method.
+	 * Or using the midpoint-method / improved explicit Euler-method:
+	 * <a href=
+	 * "https://de.wikipedia.org/wiki/Explizites_Euler-Verfahren#Verbessertes_explizites_Euler-Verfahren">Wiki</a>
+	 * <img style="background: white" src=
+	 * "https://wikimedia.org/api/rest_v1/media/math/render/svg/954d4d6d4db5080168559eb2741838c6b81e03d7"></img>
+	 * <br>
+	 * Note: In the image above, h is <code>timeStep</code>.
+	 * 
 	 * @param timeStep
 	 *            the time step to integrate over, in seconds.
 	 */
@@ -46,10 +66,17 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass
 	 * Update this {@code PhysicsObject}'s position based on its current velocity using the explicit Euler method
 	 * (<a href="https://en.wikipedia.org/wiki/Euler_method">Wikipedia: Euler method</a>).
 	 * 
+	 * TODO: Perhaps refactor to use more accurate approximation, e.g. predictor-corrector method.
+	 * 
 	 * @param timeStep
 	 *            the time step to integrate over, in seconds.
 	 */
 	public abstract void updatePosition(double timeStep);
+
+	/**
+	 * Updates all physics-related properties in the correct order using the given time delta <code>timeStep</code>.
+	 */
+	public abstract void tickPhysics(double timeSteps);
 
 	public double getMass()
 	{
