@@ -17,7 +17,7 @@ import javax.swing.JPanel;
  * explicitly telling the canvas to repaint.
  * 
  */
-public class DynamicCanvas extends JPanel
+public class DynamicCanvas extends JPanel implements IDynamicContainer<DynamicObject>
 {
 	private static final long serialVersionUID = -5218505755523100049L;
 
@@ -99,6 +99,7 @@ public class DynamicCanvas extends JPanel
 		return images.get(index);
 	}
 
+	@Override
 	public void removeAllObjects()
 	{
 		// not calling #removeObject multiple times for performance reasons
@@ -110,6 +111,7 @@ public class DynamicCanvas extends JPanel
 		invalidate();
 	}
 
+	@Override
 	public void removeAllObjects(List<DynamicObject> listToRemove)
 	{
 		synchronized (objects)
@@ -119,6 +121,7 @@ public class DynamicCanvas extends JPanel
 		invalidate();
 	}
 
+	@Override
 	public void removeObject(DynamicObject dynObj)
 	{
 		synchronized (objects)
@@ -135,11 +138,13 @@ public class DynamicCanvas extends JPanel
 		invalidate();
 	}
 
+	@Override
 	public List<DynamicObject> getObjects()
 	{
 		return objects;
 	}
 
+	@Override
 	public void addObject(DynamicObject object)
 	{
 		object.setParentCanvas(this);

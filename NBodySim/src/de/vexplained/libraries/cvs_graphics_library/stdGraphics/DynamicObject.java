@@ -10,9 +10,9 @@ import java.awt.geom.Point2D;
  * @author vExplained
  *
  */
-public abstract class DynamicObject
+public abstract class DynamicObject implements IDynamicComponent
 {
-	protected DynamicCanvas parentCanvas;
+	protected IDynamicContainer parentCanvas;
 
 	protected double x, y;
 	protected Color color;
@@ -75,10 +75,25 @@ public abstract class DynamicObject
 	/**
 	 * Sets the canvas this object is painted on. This is necessary to enable automatic repainting of the canvas upon
 	 * altering the object's properties.
+	 * 
+	 * @param parent
+	 *            the canvas this {@link DynamicObject} belongs to.
 	 */
-	public void setParentCanvas(DynamicCanvas parent)
+	@Override
+	public void setParentCanvas(IDynamicContainer parent)
 	{
 		this.parentCanvas = parent;
+	}
+
+	/**
+	 * Returns the parent canvas this {@link DynamicObject} belongs to.
+	 * 
+	 * @return the canvas this {@link DynamicObject} is drawn onto.
+	 */
+	@Override
+	public IDynamicContainer getParentCanvas()
+	{
+		return this.parentCanvas;
 	}
 
 	/**
@@ -162,6 +177,7 @@ public abstract class DynamicObject
 	 * 
 	 * @return the visibility of this {@link DynamicObject} instance.
 	 */
+	@Override
 	public boolean isVisible()
 	{
 		return visible;
@@ -170,6 +186,7 @@ public abstract class DynamicObject
 	/**
 	 * Sets the visibilty of this {@link DynamicObject} instance.
 	 */
+	@Override
 	public void setVisible(boolean visible)
 	{
 		this.visible = visible;
@@ -226,6 +243,7 @@ public abstract class DynamicObject
 	 * <br>
 	 * <i>Note that the drawing is <b>not</b> being executed at a clone of the {@link Graphics2D} instance</i>.
 	 */
+	@Override
 	public void draw(Graphics2D g2d)
 	{
 		if (visible)
@@ -249,6 +267,7 @@ public abstract class DynamicObject
 	 * Passes the invalidate call to the <code>parentCanvas</code> of this {@link DynamicObject} instance, if one is
 	 * defined. In this case, {@link DynamicCanvas#invalidate()} is called.
 	 */
+	@Override
 	public void invalidate()
 	{
 		if (parentCanvas != null)

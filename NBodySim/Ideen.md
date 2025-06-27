@@ -46,3 +46,8 @@
 
 ## Wenn die Zeit reicht:
 - Explizites Euler-Verfahren durch anderes Verfahren ersetzen, z. B. https://en.wikipedia.org/wiki/Predictor%E2%80%93corrector_method
+
+## Aktuelle Probleme:
+- Inheritance: DynamicObject sollte vermutlich keine abstrakte Klasse sein, sondern ein Interface. Es gibt zu viele versch. Anwendungsszenarien.
+    Beispiel: DynamicPhysicsObject würde auch von DynamicObject erben, hat aber keine Attribute wie Farbe etc.
+    Problem hierbei: Bei Interfaces lässt sich kein Konstruktor & Instanzvariablen definieren
