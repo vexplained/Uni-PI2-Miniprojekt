@@ -12,7 +12,7 @@ import java.awt.geom.Point2D;
  */
 public abstract class DynamicObject implements IDynamicComponent
 {
-	protected IDynamicContainer parentCanvas;
+	protected IDynamicContainer<? extends IDynamicComponent> parentCanvas;
 
 	protected double x, y;
 	protected Color color;

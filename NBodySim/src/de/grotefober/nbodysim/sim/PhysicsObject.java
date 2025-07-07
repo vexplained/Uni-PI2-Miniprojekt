@@ -2,8 +2,10 @@ package de.grotefober.nbodysim.sim;
 
 import java.util.ArrayList;
 
+import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ITickable;
+
 // TODO: Refactor to record (performance improvement? Smaller instantiation overhead)
-public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass
+public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, ITickable
 {
 
 	/**
@@ -33,6 +35,13 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass
 	 * The acceleration of this {@code PhysicsObject}
 	 */
 	protected Vector2D acceleration;
+
+	/**
+	 * If {@code true}, this object stays fixed in space, i.e. its acceleration, speed or position will not be affected
+	 * by forces applied on this object by surrounding {@link PhysicsObject}s. Nonetheless, if its acceleration or
+	 * velocity values are set manually, this object may move upon calling
+	 */
+	protected boolean isFixed;
 
 	/**
 	 * Update this {@code PhysicsObject}'s acceleration using Newton's second law (F = m*a).
@@ -73,10 +82,23 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass
 	 */
 	public abstract void updatePosition(double timeStep);
 
+	@Override
+	public void tick()
+	{
+		tickPhysics(mass);
+	}
+
 	/**
 	 * Updates all physics-related properties in the correct order using the given time delta <code>timeStep</code>.
 	 */
-	public abstract void tickPhysics(double timeSteps);
+	protected void tickPhysics(double timeStep)
+	{
+		if (!isFixed)
+		{
+			// TODO: where should this be handled? separate PhysicsManager? Where should updateAcceleration(...) be
+			// called and who supplies the arguments?
+		}
+	}
 
 	public double getMass()
 	{
@@ -117,5 +139,4 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass
 	{
 		this.acceleration = acceleration;
 	}
-
 }

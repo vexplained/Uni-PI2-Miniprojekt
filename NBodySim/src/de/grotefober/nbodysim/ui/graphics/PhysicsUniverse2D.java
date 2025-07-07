@@ -12,10 +12,11 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import de.grotefober.nbodysim.ui.graphics.dynObjects.DynamicPhysicsObject;
-import de.vexplained.libraries.cvs_graphics_library.stdGraphics.DynamicObject;
+import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicComponent;
+import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicContainer;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ObjectManager;
 
-public class PhysicsUniverse2D extends JPanel
+public class PhysicsUniverse2D extends JPanel implements IDynamicContainer<IDynamicComponent>
 {
 	private static final long serialVersionUID = 7569088216700449776L;
 
@@ -23,6 +24,10 @@ public class PhysicsUniverse2D extends JPanel
 	protected Color bgColor;
 	private List<ImageLayer> imageLayers;
 
+	/**
+	 * Holds all <b>non-physics</b> objects.
+	 */
+	private List<IDynamicComponent> dynObjects;
 	private List<DynamicPhysicsObject> dynPhysObjects;
 
 	/**
@@ -37,6 +42,7 @@ public class PhysicsUniverse2D extends JPanel
 	{
 		super();
 
+		this.dynObjects = Collections.synchronizedList(new ArrayList<IDynamicComponent>());
 		this.dynPhysObjects = Collections.synchronizedList(new ArrayList<DynamicPhysicsObject>());
 		this.imageLayers = Collections.synchronizedList(new ArrayList<ImageLayer>());
 
@@ -59,10 +65,17 @@ public class PhysicsUniverse2D extends JPanel
 		return null;
 	}
 
+	// TODO: rename methods from "...Objects" to "...Component" to reflect generalisation from "DynamicObject" to
+	// "DynamicComponent"?
+	@Override
 	public void removeAllObjects()
 	{
 		// not calling #removeObject multiple times for performance reasons
 		// (only one synchronized block instead of many syncs)
+		synchronized (dynObjects)
+		{
+			dynObjects.clear();
+		}
 		synchronized (dynPhysObjects)
 		{
 			dynPhysObjects.clear();
@@ -70,8 +83,17 @@ public class PhysicsUniverse2D extends JPanel
 		invalidate();
 	}
 
-	public void removeAllObjects(List<DynamicPhysicsObject> listToRemove)
+	/**
+	 * @deprecated Untested.
+	 */
+	@Deprecated
+	@Override
+	public void removeAllObjects(List<IDynamicComponent> listToRemove)
 	{
+		synchronized (dynObjects)
+		{
+			dynObjects.removeAll(listToRemove);
+		}
 		synchronized (dynPhysObjects)
 		{
 			dynPhysObjects.removeAll(listToRemove);
@@ -79,31 +101,56 @@ public class PhysicsUniverse2D extends JPanel
 		invalidate();
 	}
 
-	public void removeObject(DynamicPhysicsObject dynObj)
+	@Override
+	public boolean removeObject(IDynamicComponent dynObj)
 	{
-		synchronized (dynPhysObjects)
+		boolean result = false;
+		if (dynObj instanceof DynamicPhysicsObject)
 		{
-			if (dynObj.getDynamicObject().getParentCanvas() == this)
+			synchronized (dynPhysObjects)
 			{
-				int index = objects.indexOf(dynObj);
-				if (index > 0)
+				if (dynObj.getParentCanvas() == this)
 				{
-					objects.remove(index);
+					result = dynPhysObjects.remove(dynObj);
+				}
+			}
+		} else
+		{
+			synchronized (dynObjects)
+			{
+				if (dynObj.getParentCanvas() == this)
+				{
+					result = dynObjects.remove(dynObj);
 				}
 			}
 		}
+
 		invalidate();
+		return result;
 	}
 
-	public List<DynamicObject> getObjects()
+	@Override
+	public List<IDynamicComponent> getObjects()
 	{
-		return objects;
+		return dynObjects;
 	}
 
-	public void addObject(DynamicObject object)
+	public List<DynamicPhysicsObject> getPhysicsObjects()
+	{
+		return dynPhysObjects;
+	}
+
+	@Override
+	public void addObject(IDynamicComponent object)
 	{
 		object.setParentCanvas(this);
-		objects.add(object);
+		if (object instanceof DynamicPhysicsObject)
+		{
+			dynPhysObjects.add((DynamicPhysicsObject) object);
+		} else
+		{
+			dynObjects.add(object);
+		}
 		invalidate();
 	}
 
@@ -121,14 +168,23 @@ public class PhysicsUniverse2D extends JPanel
 	{
 		setupRenderingHints(g2d);
 
-		if (rotationAngle != 0)
+		synchronized (dynObjects)
 		{
-			g2d.rotate(-Math.toRadians(rotationAngle), getWidth() / 2D, getHeight() / 2D);
+			for (IDynamicComponent obj : dynObjects)
+			{
+				if (obj != null)
+				{
+					obj.draw(g2d);
+				} else
+				{
+					throw new NullPointerException("Registered object to draw is null!");
+				}
+			}
 		}
 
-		synchronized (objects)
+		synchronized (dynPhysObjects)
 		{
-			for (DynamicObject obj : objects)
+			for (IDynamicComponent obj : dynPhysObjects)
 			{
 				if (obj != null)
 				{
@@ -151,8 +207,9 @@ public class PhysicsUniverse2D extends JPanel
 
 		if (imageLayers != null && imageLayers.size() > 0)
 		{
-			for (BufferedImage img : imageLayers)
+			for (ImageLayer imgLayer : imageLayers)
 			{
+				BufferedImage img = imgLayer.img();
 				g2d.drawImage(img, 0, 0, this);
 			}
 		}

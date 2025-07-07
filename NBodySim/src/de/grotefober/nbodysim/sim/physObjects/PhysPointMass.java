@@ -26,8 +26,7 @@ public class PhysPointMass extends PhysicsObject
 	@Override
 	public Vector2D calcAcceleration(Vector2D force)
 	{
-		// FIXME F=ma => a = F/m nicht F*m
-		return force.scale(getMass());
+		return force.scale(1d / getMass());
 	}
 
 	@Override

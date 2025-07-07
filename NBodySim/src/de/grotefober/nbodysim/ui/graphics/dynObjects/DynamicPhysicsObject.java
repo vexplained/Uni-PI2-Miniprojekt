@@ -17,7 +17,7 @@ public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj ex
 	private final DynObj dynamicObject;
 	private final PhysObj physicsObject;
 
-	IDynamicContainer<DynamicPhysicsObject<DynObj, PhysObj>> parentCanvas;
+	IDynamicContainer<? extends IDynamicComponent> parentCanvas;
 
 	public DynamicPhysicsObject(DynObj dynamicObject, PhysObj physicsObject)
 	{
@@ -45,35 +45,30 @@ public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj ex
 	@Override
 	public IDynamicContainer getParentCanvas()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.dynamicObject.getParentCanvas();
 	}
 
 	@Override
 	public boolean isVisible()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.dynamicObject.isVisible();
 	}
 
 	@Override
 	public void setVisible(boolean visible)
 	{
-		// TODO Auto-generated method stub
-
+		this.dynamicObject.setVisible(visible);
 	}
 
 	@Override
 	public void draw(Graphics2D g2d)
 	{
-		// TODO Auto-generated method stub
-
+		this.dynamicObject.draw(g2d);
 	}
 
 	@Override
 	public void invalidate()
 	{
-		// TODO Auto-generated method stub
-
+		this.dynamicObject.invalidate();
 	}
 }

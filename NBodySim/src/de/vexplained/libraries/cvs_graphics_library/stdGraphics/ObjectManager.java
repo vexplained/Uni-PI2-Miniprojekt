@@ -1,6 +1,5 @@
 package de.vexplained.libraries.cvs_graphics_library.stdGraphics;
 
-import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CancellationException;
@@ -22,7 +21,7 @@ public class ObjectManager
 	 * 
 	 * This scheduling approach may be useful for simple physics simulations.
 	 */
-	public static final short OPTIMIZE_TIME_PRECISION = 0;
+	public static final short OPTIMIZE_TIME_PRECISION = 0b0;
 	/**
 	 * Optimizes the scheduling routine for best appearance. Updates are scheduled with constant <b>delay</b> using
 	 * {@link ScheduledExecutorService#scheduleWithFixedDelay(Runnable, long, long, TimeUnit)}.
@@ -30,19 +29,17 @@ public class ObjectManager
 	 * This scheduling approach may be useful for animations to mitigate the visibility of stutters. However, the
 	 * execution time of an update cycle directly influences frame rate.
 	 */
-	public static final short OPTIMIZE_ANIMATION_CONTINUITY = 1;
+	public static final short OPTIMIZE_ANIMATION_CONTINUITY = 0b1;
 
-	private Graphics2D g2d;
-	private DynamicCanvas canvas;
+	private IDynamicContainer canvas;
 	private ScheduledExecutorService tickScheduler;
 	private Future<?> futureTask;
-	private List<DynamicTickableObject> objects;
+	private List<ITickable> objects;
 
-	public ObjectManager(DynamicCanvas canvas)
+	public ObjectManager(IDynamicContainer canvas)
 	{
 		this.canvas = canvas;
-		g2d = (Graphics2D) canvas.getGraphics();
-		objects = new ArrayList<DynamicTickableObject>();
+		objects = new ArrayList<ITickable>();
 		tickScheduler = Executors.newSingleThreadScheduledExecutor();
 	}
 
@@ -71,7 +68,7 @@ public class ObjectManager
 	 */
 	public void enableTickScheduler(short optimizationApproach)
 	{
-
+		enableTickScheduler(0, optimizationApproach);
 	}
 
 	/**
@@ -132,7 +129,7 @@ public class ObjectManager
 		}
 	}
 
-	public void addToTickScheduler(DynamicTickableObject toAdd)
+	public void addToTickScheduler(ITickable toAdd)
 	{
 		synchronized (objects)
 		{
@@ -151,11 +148,11 @@ public class ObjectManager
 	 */
 	public void addAllFromCanvas()
 	{
-		for (DynamicObject obj : canvas.getObjects())
+		for (Object obj : canvas.getObjects())
 		{
-			if (obj instanceof DynamicTickableObject)
+			if (obj instanceof ITickable)
 			{
-				addToTickScheduler((DynamicTickableObject) obj);
+				addToTickScheduler((ITickable) obj);
 			}
 		}
 	}
@@ -164,7 +161,7 @@ public class ObjectManager
 	 * Removes an object from the tick scheduler so it will no longer receive automated calls to its
 	 * {@link DynamicTickableObject#tick()} method.
 	 */
-	public void removeFromTickScheduler(DynamicTickableObject toRemove)
+	public void removeFromTickScheduler(ITickable toRemove)
 	{
 		synchronized (objects)
 		{
@@ -215,11 +212,11 @@ public class ObjectManager
 		// Synchronize access to objects to avoid concurrency issues
 		synchronized (objects)
 		{
-			for (DynamicTickableObject obj : objects)
+			for (ITickable obj : objects)
 			{
 				obj.tick();
 			}
 		}
-		canvas.repaint();
+		canvas.invalidate();
 	}
 }

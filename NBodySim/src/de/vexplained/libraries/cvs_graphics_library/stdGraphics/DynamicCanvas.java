@@ -122,20 +122,24 @@ public class DynamicCanvas extends JPanel implements IDynamicContainer<DynamicOb
 	}
 
 	@Override
-	public void removeObject(DynamicObject dynObj)
+	public boolean removeObject(DynamicObject dynObj)
 	{
+		int index = -1;
 		synchronized (objects)
 		{
 			if (dynObj.parentCanvas == this)
 			{
-				int index = objects.indexOf(dynObj);
+				// XXX: Why did I implement it this way instead of calling #remove(object)?
+				index = objects.indexOf(dynObj);
 				if (index > 0)
 				{
 					objects.remove(index);
 				}
 			}
 		}
+
 		invalidate();
+		return index > 0;
 	}
 
 	@Override
