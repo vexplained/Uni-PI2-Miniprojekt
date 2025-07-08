@@ -7,7 +7,9 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JPanel;
 
@@ -27,8 +29,8 @@ public class PhysicsUniverse2D extends JPanel implements IDynamicContainer<IDyna
 	/**
 	 * Holds all <b>non-physics</b> objects.
 	 */
-	private List<IDynamicComponent> dynObjects;
-	private List<DynamicPhysicsObject> dynPhysObjects;
+	private Set<IDynamicComponent> dynObjects;
+	private Set<DynamicPhysicsObject> dynPhysObjects;
 
 	/**
 	 * Creates a new canvas object.
@@ -42,8 +44,8 @@ public class PhysicsUniverse2D extends JPanel implements IDynamicContainer<IDyna
 	{
 		super();
 
-		this.dynObjects = Collections.synchronizedList(new ArrayList<IDynamicComponent>());
-		this.dynPhysObjects = Collections.synchronizedList(new ArrayList<DynamicPhysicsObject>());
+		this.dynObjects = Collections.synchronizedSet(new HashSet<IDynamicComponent>());
+		this.dynPhysObjects = Collections.synchronizedSet(new HashSet<DynamicPhysicsObject>());
 		this.imageLayers = Collections.synchronizedList(new ArrayList<ImageLayer>());
 
 		setBackground(bgColor);
@@ -132,10 +134,12 @@ public class PhysicsUniverse2D extends JPanel implements IDynamicContainer<IDyna
 	@Override
 	public List<IDynamicComponent> getObjects()
 	{
-		return dynObjects;
+		List<IDynamicComponent> allObjects = new ArrayList<>(dynObjects);
+		allObjects.addAll(dynPhysObjects);
+		return allObjects;
 	}
 
-	public List<DynamicPhysicsObject> getPhysicsObjects()
+	public List<DynamicPhysicsObject> getDynPhysicsObjects()
 	{
 		return dynPhysObjects;
 	}

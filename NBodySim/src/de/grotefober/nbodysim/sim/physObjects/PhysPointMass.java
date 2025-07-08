@@ -3,7 +3,6 @@ package de.grotefober.nbodysim.sim.physObjects;
 import de.grotefober.nbodysim.sim.PhysicsConstants;
 import de.grotefober.nbodysim.sim.PhysicsObject;
 import de.grotefober.nbodysim.sim.Vector2D;
-import de.grotefober.nbodysim.sim.Vector2D.Double.Mutable;
 import de.grotefober.nbodysim.util.Vector2DUtils;
 
 public class PhysPointMass extends PhysicsObject
@@ -29,43 +28,4 @@ public class PhysPointMass extends PhysicsObject
 		return force.scale(1d / getMass());
 	}
 
-	@Override
-	public void updateAcceleration(Vector2D force)
-	{
-		this.setAcceleration(calcAcceleration(force));
-	}
-
-	@Override
-	public void updateAcceleration(Vector2D[] forces)
-	{
-		Vector2D.Double.Mutable forceResult = new Vector2D.Double.Mutable();
-		for (Vector2D force : forces)
-		{
-			forceResult.add(force);
-		}
-		this.setAcceleration(forceResult);
-	}
-
-	@Override
-	public void updateVelocity(double timeStep)
-	{
-		// Vector2D vOld = (Vector2D) getVelocity().clone();
-
-		// TODO optimize to use mutable operations?
-		// Vector2D vNew = vOld.add(this.getAcceleration().scale(timeStep));
-		((Mutable) this.velocity).add(this.acceleration.scale(timeStep));
-	}
-
-	@Override
-	public void updatePosition(double timeStep)
-	{
-		((Mutable) this.location).add(this.velocity.scale(timeStep));
-	}
-
-	@Override
-	public void tickPhysics(double timeSteps)
-	{
-		// TODO Auto-generated method stub
-
-	}
 }

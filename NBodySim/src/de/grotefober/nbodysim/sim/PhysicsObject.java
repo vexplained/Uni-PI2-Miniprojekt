@@ -2,6 +2,7 @@ package de.grotefober.nbodysim.sim;
 
 import java.util.ArrayList;
 
+import de.grotefober.nbodysim.sim.Vector2D.Double.Mutable;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ITickable;
 
 // TODO: Refactor to record (performance improvement? Smaller instantiation overhead)
@@ -46,12 +47,23 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	/**
 	 * Update this {@code PhysicsObject}'s acceleration using Newton's second law (F = m*a).
 	 */
-	public abstract void updateAcceleration(Vector2D force);
+	public void updateAcceleration(Vector2D force)
+	{
+		this.setAcceleration(calcAcceleration(force));
+	}
 
 	/**
 	 * Update this {@code PhysicsObject}'s acceleration using Newton's second law (F = m*a).
 	 */
-	public abstract void updateAcceleration(Vector2D[] forces);
+	public void updateAcceleration(Vector2D[] forces)
+	{
+		Vector2D.Double.Mutable forceResult = new Vector2D.Double.Mutable();
+		for (Vector2D force : forces)
+		{
+			forceResult.add(force);
+		}
+		this.setAcceleration(calcAcceleration(forceResult));
+	}
 
 	/**
 	 * Update this {@code PhysicsObject}'s velocity based on its current acceleration using the explicit Euler method
@@ -69,7 +81,14 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	 * @param timeStep
 	 *            the time step to integrate over, in seconds.
 	 */
-	public abstract void updateVelocity(double timeStep);
+	public void updateVelocity(double timeStep)
+	{
+		// Vector2D vOld = (Vector2D) getVelocity().clone();
+
+		// TODO optimize to use mutable operations?
+		// Vector2D vNew = vOld.add(this.getAcceleration().scale(timeStep));
+		((Mutable) this.velocity).add(this.acceleration.scale(timeStep));
+	}
 
 	/**
 	 * Update this {@code PhysicsObject}'s position based on its current velocity using the explicit Euler method
@@ -80,7 +99,10 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	 * @param timeStep
 	 *            the time step to integrate over, in seconds.
 	 */
-	public abstract void updatePosition(double timeStep);
+	public void updatePosition(double timeStep)
+	{
+		((Mutable) this.location).add(this.velocity.scale(timeStep));
+	}
 
 	@Override
 	public void tick()

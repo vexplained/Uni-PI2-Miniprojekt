@@ -6,13 +6,14 @@ import de.grotefober.nbodysim.sim.PhysicsObject;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.DynamicObject;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicComponent;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicContainer;
+import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ITickable;
 
 /**
  * Compound class for attaching a {@link DynamicObject} or any of its subclasses and its physics shadow (any class
  * extending {@link PhysicsObject}) to each other.
  */
 public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj extends PhysicsObject>
-		implements IDynamicComponent
+		implements IDynamicComponent, ITickable
 {
 	private final DynObj dynamicObject;
 	private final PhysObj physicsObject;
@@ -70,5 +71,12 @@ public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj ex
 	public void invalidate()
 	{
 		this.dynamicObject.invalidate();
+	}
+
+	@Override
+	public void tick()
+	{
+		// TODO Auto-generated method stub
+
 	}
 }
