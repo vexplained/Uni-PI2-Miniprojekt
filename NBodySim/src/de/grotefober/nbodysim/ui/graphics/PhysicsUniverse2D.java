@@ -139,7 +139,7 @@ public class PhysicsUniverse2D extends JPanel implements IDynamicContainer<IDyna
 		return allObjects;
 	}
 
-	public List<DynamicPhysicsObject> getDynPhysicsObjects()
+	public Set<DynamicPhysicsObject> getDynPhysicsObjects()
 	{
 		return dynPhysObjects;
 	}

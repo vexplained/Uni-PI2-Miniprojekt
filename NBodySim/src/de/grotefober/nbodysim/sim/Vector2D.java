@@ -316,7 +316,7 @@ public abstract class Vector2D implements Cloneable
 	public abstract void setY(double y);
 
 	/**
-	 * Sets the location of this {@code Vector2D} to the
+	 * Sets the position of this {@code Vector2D} to the
 	 * specified {@code double} coordinates.
 	 *
 	 * @param x
@@ -327,7 +327,7 @@ public abstract class Vector2D implements Cloneable
 	public abstract void setLocation(double x, double y);
 
 	/**
-	 * Sets the location of this {@code Vector2D} to the same
+	 * Sets the position of this {@code Vector2D} to the same
 	 * coordinates as the specified {@code Vector2D} object.
 	 *
 	 * @param p

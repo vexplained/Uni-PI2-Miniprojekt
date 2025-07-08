@@ -1,21 +1,18 @@
 package de.grotefober.nbodysim.sim;
 
-import java.util.ArrayList;
-
 import de.grotefober.nbodysim.sim.Vector2D.Double.Mutable;
-import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ITickable;
 
 // TODO: Refactor to record (performance improvement? Smaller instantiation overhead)
-public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, ITickable
+public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, IPhysicsTickable
 {
 
-	/**
-	 * Contains all {@link PhysicsObject}s of this' object's parent universe.
-	 * <br>
-	 * FIXME: Perhaps refactor to contain only reference to parent container / PhysicsController -> reduce duplicate
-	 * memory (same List for every object)
-	 */
-	protected ArrayList<PhysicsObject> parentUniverse;
+	// /**
+	// * Contains all {@link PhysicsObject}s of this' object's parent universe.
+	// * <br>
+	// * FIXME: Perhaps refactor to contain only reference to parent container / PhysicsController -> reduce duplicate
+	// * memory (same List for every object)
+	// */
+	// protected ArrayList<PhysicsObject> parentUniverse;
 
 	/**
 	 * The mass of this {@code PhysicsObject}
@@ -23,9 +20,9 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	protected double mass;
 
 	/**
-	 * The location of this {@code PhysicsObject}
+	 * The position of this {@code PhysicsObject}
 	 */
-	protected Vector2D location;
+	protected Vector2D position;
 
 	/**
 	 * The velocity of this {@code PhysicsObject}
@@ -99,27 +96,50 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	 * @param timeStep
 	 *            the time step to integrate over, in seconds.
 	 */
-	public void updatePosition(double timeStep)
+	public void updateLocation(double timeStep)
 	{
-		((Mutable) this.location).add(this.velocity.scale(timeStep));
-	}
-
-	@Override
-	public void tick()
-	{
-		tickPhysics(mass);
+		((Mutable) this.position).add(this.velocity.scale(timeStep));
 	}
 
 	/**
-	 * Updates all physics-related properties in the correct order using the given time delta <code>timeStep</code>.
+	 * Updates the acceleration vector of this object, if it is not declared as fixed (see {@link #isFixed()}).
 	 */
-	protected void tickPhysics(double timeStep)
+	@Override
+	public void tickAcceleration(PhysicsManager physMan)
 	{
-		if (!isFixed)
+		if (isFixed)
 		{
-			// TODO: where should this be handled? separate PhysicsManager? Where should updateAcceleration(...) be
-			// called and who supplies the arguments?
+			return;
 		}
+
+		Vector2D.Double.Mutable forceResult = new Vector2D.Double.Mutable();
+		for (PhysicsObject obj : physMan.getPhysicsShadows())
+		{
+			forceResult.add(this.calcExcertedForce(obj));
+		}
+
+		updateAcceleration(forceResult);
+	}
+
+	@Override
+	public void tickVelocity(PhysicsManager physMan)
+	{
+		updateVelocity(physMan.getSimulationTimeStep());
+
+	}
+
+	@Override
+	public void tickPosition(PhysicsManager physMan)
+	{
+		updateLocation(physMan.getSimulationTimeStep());
+	}
+
+	@Override
+	public void tickAll(PhysicsManager physMan)
+	{
+		tickAcceleration(physMan);
+		tickVelocity(physMan);
+		tickPosition(physMan);
 	}
 
 	public double getMass()
@@ -132,14 +152,14 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 		this.mass = mass;
 	}
 
-	public Vector2D getLocation()
+	public Vector2D getPosition()
 	{
-		return location;
+		return position;
 	}
 
-	public void setLocation(Vector2D location)
+	public void setPosition(Vector2D position)
 	{
-		this.location = location;
+		this.position = position;
 	}
 
 	public Vector2D getVelocity()
@@ -160,5 +180,23 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	public void setAcceleration(Vector2D acceleration)
 	{
 		this.acceleration = acceleration;
+	}
+
+	/**
+	 * If {@code true}, this object stays fixed in space, i.e. its acceleration, speed or position will not be affected
+	 * by forces applied on this object by surrounding {@link PhysicsObject}s. Nonetheless, if its acceleration or
+	 * velocity values are set manually, this object may move upon calling
+	 */
+	public boolean isFixed()
+	{
+		return isFixed;
+	}
+
+	/**
+	 * @see #isFixed()
+	 */
+	public void setFixed(boolean isFixed)
+	{
+		this.isFixed = isFixed;
 	}
 }

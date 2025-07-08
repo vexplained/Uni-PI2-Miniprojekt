@@ -2,28 +2,29 @@ package de.grotefober.nbodysim.ui.graphics.dynObjects;
 
 import java.awt.Graphics2D;
 
+import de.grotefober.nbodysim.sim.IPhysicsTickable;
+import de.grotefober.nbodysim.sim.PhysicsManager;
 import de.grotefober.nbodysim.sim.PhysicsObject;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.DynamicObject;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicComponent;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicContainer;
-import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ITickable;
 
 /**
  * Compound class for attaching a {@link DynamicObject} or any of its subclasses and its physics shadow (any class
  * extending {@link PhysicsObject}) to each other.
  */
 public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj extends PhysicsObject>
-		implements IDynamicComponent, ITickable
+		implements IDynamicComponent, IPhysicsTickable
 {
 	private final DynObj dynamicObject;
-	private final PhysObj physicsObject;
+	private final PhysObj physicsShadow;
 
 	IDynamicContainer<? extends IDynamicComponent> parentCanvas;
 
 	public DynamicPhysicsObject(DynObj dynamicObject, PhysObj physicsObject)
 	{
 		this.dynamicObject = dynamicObject;
-		this.physicsObject = physicsObject;
+		this.physicsShadow = physicsObject;
 	}
 
 	public DynObj getDynamicObject()
@@ -33,7 +34,7 @@ public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj ex
 
 	public PhysObj getPhysicsObject()
 	{
-		return physicsObject;
+		return physicsShadow;
 	}
 
 	@Override
@@ -74,9 +75,27 @@ public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj ex
 	}
 
 	@Override
-	public void tick()
+	public void tickAll(PhysicsManager physMan)
 	{
-		// TODO Auto-generated method stub
-
+		this.physicsShadow.tickAll(physMan);
 	}
+
+	@Override
+	public void tickAcceleration(PhysicsManager physMan)
+	{
+		this.physicsShadow.tickAcceleration(physMan);
+	}
+
+	@Override
+	public void tickVelocity(PhysicsManager physMan)
+	{
+		this.physicsShadow.tickVelocity(physMan);
+	}
+
+	@Override
+	public void tickPosition(PhysicsManager physMan)
+	{
+		this.physicsShadow.tickPosition(physMan);
+	}
+
 }

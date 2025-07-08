@@ -1,7 +1,8 @@
 package de.grotefober.nbodysim.sim;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import de.grotefober.nbodysim.ui.graphics.PhysicsUniverse2D;
 import de.grotefober.nbodysim.ui.graphics.dynObjects.DynamicPhysicsObject;
@@ -17,13 +18,42 @@ public class PhysicsManager extends ObjectManager
 	 * FIXME: Perhaps refactor to contain only reference to parent container / PhysicsController -> reduce duplicate
 	 * memory (same List for every object)
 	 */
-	protected List<DynamicPhysicsObject> universe;
+	protected Set<DynamicPhysicsObject> universe;
+
+	private Set<PhysicsObject> physicsShadows;
+
+	/**
+	 * Time delta between two physics calculations, in seconds.
+	 */
+	private double simulationTimeStep;
 
 	public PhysicsManager(PhysicsUniverse2D physUniverse)
 	{
 		super(physUniverse);
+		// Create copy of physUniverse set
 		this.universe = Collections.synchronizedSet(physUniverse.getDynPhysicsObjects());
-		this.universe = physUniverse.getDynPhysicsObjects();
+		this.physicsShadows = Collections.synchronizedSet(new HashSet<>(this.universe.size()));
+		this.simulationTimeStep = 1 / 60d;
+	}
+
+	public double getSimulationTimeStep()
+	{
+		return simulationTimeStep;
+	}
+
+	public void setSimulationTimeStep(double simulationTimeStep)
+	{
+		this.simulationTimeStep = simulationTimeStep;
+	}
+
+	public Set<DynamicPhysicsObject> getUniverse()
+	{
+		return universe;
+	}
+
+	public Set<PhysicsObject> getPhysicsShadows()
+	{
+		return physicsShadows;
 	}
 
 	@Override
@@ -35,14 +65,70 @@ public class PhysicsManager extends ObjectManager
 			{
 				universe.add((DynamicPhysicsObject) toAdd);
 			}
+			synchronized (physicsShadows)
+			{
+				physicsShadows.add(((DynamicPhysicsObject) toAdd).getPhysicsObject());
+			}
 		} else
 		{
 			super.addToTickScheduler(toAdd);
 		}
 	}
 
-	// public void addToTickScheduler(DynamicPhysicsObject dynPhysObject)
-	// {
-	// objectManager.addToTickScheduler(dynPhysObject);
-	// }
+	@Override
+	public void removeFromTickScheduler(ITickable toRemove)
+	{
+		if (toRemove instanceof DynamicPhysicsObject)
+		{
+			synchronized (universe)
+			{
+				universe.remove(toRemove);
+			}
+			synchronized (physicsShadows)
+			{
+				physicsShadows.remove(((DynamicPhysicsObject) toRemove).getPhysicsObject());
+			}
+		} else
+		{
+			super.removeFromTickScheduler(toRemove);
+		}
+	}
+
+	@Override
+	public void removeAll()
+	{
+		super.removeAll();
+		synchronized (universe)
+		{
+			universe.clear();
+		}
+		synchronized (physicsShadows)
+		{
+			physicsShadows.clear();
+		}
+	}
+
+	@Override
+	public void runTick()
+	{
+		super.runTick();
+
+		synchronized (universe)
+		{
+			// TODO optimize somehow?
+			for (IPhysicsTickable obj : universe)
+			{
+				obj.tickAcceleration(this);
+			}
+			for (IPhysicsTickable obj : universe)
+			{
+				obj.tickVelocity(this);
+			}
+			for (IPhysicsTickable obj : universe)
+			{
+				obj.tickPosition(this);
+			}
+		}
+	}
+
 }
