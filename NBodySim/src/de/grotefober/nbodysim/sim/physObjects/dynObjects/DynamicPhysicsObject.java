@@ -21,10 +21,30 @@ public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj ex
 
 	IDynamicContainer<? extends IDynamicComponent> parentCanvas;
 
-	public DynamicPhysicsObject(DynObj dynamicObject, PhysObj physicsObject)
+	private final double distanceFactor;
+
+	/**
+	 * For initial position, velocity and acceleration, the <code>physicsObject</code>'s values are preserved and the
+	 * <code>dynamicObject</code> is synchronized to match the physicsObject's position corrected by the
+	 * <code>distanceFactor</code>.
+	 * <br>
+	 * The relation between the position of the dynamic object and the physics object is as follows:
+	 *
+	 * <pre>
+	 * dynamicObject#position = (1 / distanceFactor) * physicsObject#position
+	 * </pre>
+	 * 
+	 * @param distanceFactor
+	 *            the factor to multiply distances by. It may be used if the distance vectors represent pixel values
+	 *            instead of physical distances.
+	 */
+	public DynamicPhysicsObject(DynObj dynamicObject, PhysObj physicsObject, double distanceFactor)
 	{
 		this.dynamicObject = dynamicObject;
 		this.physicsShadow = physicsObject;
+		this.distanceFactor = distanceFactor;
+
+		syncDynamicObject();
 	}
 
 	public DynObj getDynamicObject()
@@ -103,8 +123,13 @@ public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj ex
 	 */
 	public void syncDynamicObject()
 	{
-		dynamicObject.setX(physicsShadow.getPosition().getX());
-		dynamicObject.setY(physicsShadow.getPosition().getY());
+		dynamicObject.setX(physicsShadow.getPosition().getX() / distanceFactor);
+		dynamicObject.setY(physicsShadow.getPosition().getY() / distanceFactor);
+	}
+
+	public double getDistanceFactor()
+	{
+		return distanceFactor;
 	}
 
 }

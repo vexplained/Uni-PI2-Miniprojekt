@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,7 +45,8 @@ public class PhysicsUniverse2D extends JPanel implements IDynamicContainer<IDyna
 	{
 		super();
 
-		this.dynObjects = Collections.synchronizedSet(new HashSet<IDynamicComponent>());
+		// Use LinkedHashSet for drawable objects to draw them in the order they were added
+		this.dynObjects = Collections.synchronizedSet(new LinkedHashSet<IDynamicComponent>());
 		this.dynPhysObjects = Collections.synchronizedSet(new HashSet<DynamicPhysicsObject>());
 		this.imageLayers = Collections.synchronizedList(new ArrayList<ImageLayer>());
 

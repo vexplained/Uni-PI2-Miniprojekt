@@ -115,6 +115,20 @@ public abstract class Vector2D implements Cloneable
 				return this;
 			}
 
+			@Override
+			public Vector2D clamp(double maxLength)
+			{
+				double lengthSq = this.distanceSq(0, 0);
+				double maxLengthSq = maxLength * maxLength;
+				if (lengthSq > maxLengthSq)
+				{
+					double factor = Math.sqrt(maxLengthSq / lengthSq);
+					this.setLocation(this.getX() * factor, this.getY() * factor);
+					return this;
+				}
+				return this;
+			}
+
 			/**
 			 * Normalizes this vector to a length of one.
 			 * 
@@ -125,6 +139,12 @@ public abstract class Vector2D implements Cloneable
 			{
 				this.scale(1d / this.getMagnitude());
 				return this;
+			}
+
+			@Override
+			public String toString()
+			{
+				return "Vector2D.Double.Mutable[" + x + ", " + y + "]";
 			}
 		}
 
@@ -151,6 +171,14 @@ public abstract class Vector2D implements Cloneable
 		{
 			this.x = x;
 			this.y = y;
+		}
+
+		/**
+		 * Creates a copy of the given vector.
+		 */
+		public Double(Vector2D vector)
+		{
+			this(vector.getX(), vector.getY());
 		}
 
 		/**
@@ -208,7 +236,6 @@ public abstract class Vector2D implements Cloneable
 		@Override
 		public String toString()
 		{
-
 			return "Vector2D.Double[" + x + ", " + y + "]";
 		}
 
@@ -556,6 +583,18 @@ public abstract class Vector2D implements Cloneable
 		double px = pt.getX() - this.getX();
 		double py = pt.getY() - this.getY();
 		return Math.sqrt(px * px + py * py);
+	}
+
+	public Vector2D clamp(double maxLength)
+	{
+		double lengthSq = this.distanceSq(0, 0);
+		double maxLengthSq = maxLength * maxLength;
+		if (lengthSq > maxLengthSq)
+		{
+			double factor = Math.sqrt(maxLengthSq / lengthSq);
+			return this.scale(factor);
+		}
+		return this;
 	}
 
 	/**

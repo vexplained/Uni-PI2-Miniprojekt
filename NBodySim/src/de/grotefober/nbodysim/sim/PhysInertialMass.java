@@ -12,4 +12,6 @@ public interface PhysInertialMass
 	 * @return the acceleration excerted on this physics object.
 	 */
 	Vector2D calcAcceleration(Vector2D force);
+
+	// public Vector2D calcAcceleration(PhysicsObject other);
 }

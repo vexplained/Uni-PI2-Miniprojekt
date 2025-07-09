@@ -32,9 +32,13 @@ public class PhysPointMass extends PhysicsObject
 	@Override
 	public Vector2D calcExcertedForce(PhysicsObject other)
 	{
-		Vector2D diff = this.getPosition().subtract(other.getPosition());
+		// r_2 - r_1 (=> sign determines direction)
+		Vector2D diff = other.getPosition().subtract(this.getPosition());
+		// (F = c / r^2 e_r = c / r^3 * r_vector)
 		return diff.scale(PhysicsConstants.G * this.getMass() * other.getMass()
-				/ Vector2DUtils.distCubed(this.getPosition(), other.getPosition()));
+				/ Vector2DUtils.distCubed(other.getPosition(), this.getPosition())); // distCubed since we are scaling
+																					 // the vector pointing from this to
+																					 // the other object
 	}
 
 	@Override
@@ -42,5 +46,15 @@ public class PhysPointMass extends PhysicsObject
 	{
 		return force.scale(1d / getMass());
 	}
+
+	// @Override
+	// public Vector2D calcAcceleration(PhysicsObject other)
+	// {
+	// // more efficient to omit factor this#getMass instead of using #calcExcertedForce
+	// Vector2D diff = this.getPosition().subtract(other.getPosition());
+	// // (F = c / r^2 e_r = c / r^3 * r_vector)
+	// return diff.scale(PhysicsConstants.G * other.getMass()
+	// / Vector2DUtils.distCubed(this.getPosition(), other.getPosition()));
+	// }
 
 }

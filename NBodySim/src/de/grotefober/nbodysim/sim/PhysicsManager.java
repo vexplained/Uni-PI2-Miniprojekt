@@ -25,6 +25,28 @@ public class PhysicsManager extends ObjectManager
 	private double simulationTimeStep;
 
 	/**
+	 * Factor to multiply pixel distances by to get "real" distances.
+	 * 
+	 * The value of <code>1E9</code> results in each pixel representing <b>one million kilometers</b>.
+	 */
+	public final double DISTANCE_FACTOR = 1E9;
+
+	/**
+	 * Acceleration limit (absolute value) to prevent objects flying outside the rendered region when approaching each
+	 * other
+	 * closely.
+	 * TODO: Fix grammar in this doc ;)
+	 */
+	public final double ACCEL_CAP = 1E9;
+
+	/**
+	 * Velocity limit (absolute value) to prevent objects flying outside the rendered region when approaching each other
+	 * closely.
+	 * TODO: Fix grammar in this doc ;)
+	 */
+	public final double VELOCITY_CAP = 1E10;
+
+	/**
 	 * Instantiates a new {@link PhysicsManager} using the given universe and a simulation time step of 1/60 s.
 	 */
 	public PhysicsManager(PhysicsUniverse2D physUniverse)
@@ -33,8 +55,7 @@ public class PhysicsManager extends ObjectManager
 		// Create copy of physUniverse set
 		this.universe = Collections.synchronizedSet(physUniverse.getDynPhysicsObjects());
 		this.physicsShadows = Collections.synchronizedSet(new HashSet<>(this.universe.size()));
-		// this.simulationTimeStep = 1 / 60d;
-		this.simulationTimeStep = 1;
+		this.simulationTimeStep = 1d;
 	}
 
 	public double getSimulationTimeStep()
@@ -60,7 +81,9 @@ public class PhysicsManager extends ObjectManager
 	@Override
 	public void enableTickScheduler()
 	{
-		super.enableTickScheduler((int) (this.simulationTimeStep * 1000), OPTIMIZE_TIME_PRECISION);
+		// super.enableTickScheduler((int) (this.simulationTimeStep * 1000), OPTIMIZE_TIME_PRECISION);
+		// FIXME change in prod
+		super.enableTickScheduler(16, OPTIMIZE_TIME_PRECISION);
 	}
 
 	@Override
@@ -123,17 +146,14 @@ public class PhysicsManager extends ObjectManager
 		synchronized (universe)
 		{
 			// TODO optimize somehow?
-			System.out.println("accel:");
 			for (IPhysicsTickable obj : universe)
 			{
 				obj.tickAcceleration(this);
 			}
-			System.out.println("vel:");
 			for (IPhysicsTickable obj : universe)
 			{
 				obj.tickVelocity(this);
 			}
-			System.out.println("pos:");
 			for (IPhysicsTickable obj : universe)
 			{
 				obj.tickPosition(this);
