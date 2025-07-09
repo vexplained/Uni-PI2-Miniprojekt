@@ -13,10 +13,7 @@ public class PhysicsManager extends ObjectManager
 {
 
 	/**
-	 * Contains all {@link PhysicsObject}s of this' object's parent universe.
-	 * <br>
-	 * FIXME: Perhaps refactor to contain only reference to parent container / PhysicsController -> reduce duplicate
-	 * memory (same List for every object)
+	 * Contains all {@link DynamicPhysicsObject}s.
 	 */
 	protected Set<DynamicPhysicsObject> universe;
 
@@ -27,6 +24,9 @@ public class PhysicsManager extends ObjectManager
 	 */
 	private double simulationTimeStep;
 
+	/**
+	 * Instantiates a new {@link PhysicsManager} using the given universe and a simulation time step of 1/60 s.
+	 */
 	public PhysicsManager(PhysicsUniverse2D physUniverse)
 	{
 		super(physUniverse);
@@ -127,8 +127,20 @@ public class PhysicsManager extends ObjectManager
 			for (IPhysicsTickable obj : universe)
 			{
 				obj.tickPosition(this);
+
+				if (obj instanceof DynamicPhysicsObject)
+				{
+					// TODO: better approach for syncing? Define #syncDynamicObj in IPhysicsTickable? (-> no)
+					// How to avoid typechecking & casting in each loop iteration of #runTick?
+					((DynamicPhysicsObject) obj).syncDynamicObject();
+				}
 			}
 		}
+		// Repaint canvas
+		// TODO perhaps delegate to separate worker
+		// => make simulation & display independent
+		// When doing so: also move obj#syncDynamicObject in loop above
+		this.canvas.invalidate();
 	}
 
 }

@@ -75,9 +75,9 @@ public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj ex
 	}
 
 	@Override
-	public void tickAll(PhysicsManager physMan)
+	public void tickPhysics(PhysicsManager physMan)
 	{
-		this.physicsShadow.tickAll(physMan);
+		this.physicsShadow.tickPhysics(physMan);
 	}
 
 	@Override
@@ -96,6 +96,15 @@ public final class DynamicPhysicsObject<DynObj extends DynamicObject, PhysObj ex
 	public void tickPosition(PhysicsManager physMan)
 	{
 		this.physicsShadow.tickPosition(physMan);
+	}
+
+	/**
+	 * Updates the dynamic object's position to reflect the state of its physics shadow.
+	 */
+	public void syncDynamicObject()
+	{
+		dynamicObject.setX(physicsShadow.getPosition().getX());
+		dynamicObject.setY(physicsShadow.getPosition().getY());
 	}
 
 }

@@ -13,10 +13,10 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
+import de.grotefober.nbodysim.sim.PhysicsManager;
 import de.grotefober.nbodysim.ui.graphics.dynObjects.DynamicPhysicsObject;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicComponent;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicContainer;
-import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ObjectManager;
 
 public class PhysicsUniverse2D extends JPanel implements IDynamicContainer<IDynamicComponent>
 {
@@ -226,10 +226,10 @@ public class PhysicsUniverse2D extends JPanel implements IDynamicContainer<IDyna
 	}
 
 	/**
-	 * @return A newly created {@link ObjectManager} using this canvas.
+	 * @return A newly created {@link PhysicsManager} using this canvas.
 	 */
-	public ObjectManager createObjectManager()
+	public PhysicsManager createPhysicsManager()
 	{
-		return new ObjectManager(this);
+		return new PhysicsManager(this);
 	}
 }

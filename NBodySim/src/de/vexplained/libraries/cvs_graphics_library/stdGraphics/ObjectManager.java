@@ -31,7 +31,7 @@ public class ObjectManager
 	 */
 	public static final short OPTIMIZE_ANIMATION_CONTINUITY = 0b1;
 
-	private IDynamicContainer canvas;
+	protected IDynamicContainer canvas;
 	private ScheduledExecutorService tickScheduler;
 	private Future<?> futureTask;
 	private List<ITickable> objects;

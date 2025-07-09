@@ -13,7 +13,7 @@ public interface IPhysicsTickable extends ITickable
 	 * <li>{@link #tickPosition(PhysicsManager)} of all objects.
 	 * </ol>
 	 */
-	public void tickAll(PhysicsManager physMan);
+	public void tickPhysics(PhysicsManager physMan);
 
 	/**
 	 * Updates the acceleration vector of this object.
@@ -25,11 +25,12 @@ public interface IPhysicsTickable extends ITickable
 	public void tickPosition(PhysicsManager physMan);
 
 	/**
-	 * @deprecated Not implemented. Use {@link #tickAll(PhysicsManager)} instead.
+	 * @deprecated Not implemented. Use {@link #tickPhysics(PhysicsManager)} instead.
 	 */
 	@Override
 	@Deprecated
 	public default void tick()
 	{
 	}
+
 }

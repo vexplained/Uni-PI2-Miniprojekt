@@ -135,7 +135,7 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	}
 
 	@Override
-	public void tickAll(PhysicsManager physMan)
+	public void tickPhysics(PhysicsManager physMan)
 	{
 		tickAcceleration(physMan);
 		tickVelocity(physMan);
