@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.grotefober.nbodysim.sim.physObjects.dynObjects.DynamicPhysicsObject;
 import de.grotefober.nbodysim.ui.graphics.PhysicsUniverse2D;
-import de.grotefober.nbodysim.ui.graphics.dynObjects.DynamicPhysicsObject;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ITickable;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ObjectManager;
 
@@ -33,7 +33,8 @@ public class PhysicsManager extends ObjectManager
 		// Create copy of physUniverse set
 		this.universe = Collections.synchronizedSet(physUniverse.getDynPhysicsObjects());
 		this.physicsShadows = Collections.synchronizedSet(new HashSet<>(this.universe.size()));
-		this.simulationTimeStep = 1 / 60d;
+		// this.simulationTimeStep = 1 / 60d;
+		this.simulationTimeStep = 1;
 	}
 
 	public double getSimulationTimeStep()
@@ -54,6 +55,12 @@ public class PhysicsManager extends ObjectManager
 	public Set<PhysicsObject> getPhysicsShadows()
 	{
 		return physicsShadows;
+	}
+
+	@Override
+	public void enableTickScheduler()
+	{
+		super.enableTickScheduler((int) (this.simulationTimeStep * 1000), OPTIMIZE_TIME_PRECISION);
 	}
 
 	@Override
@@ -116,14 +123,17 @@ public class PhysicsManager extends ObjectManager
 		synchronized (universe)
 		{
 			// TODO optimize somehow?
+			System.out.println("accel:");
 			for (IPhysicsTickable obj : universe)
 			{
 				obj.tickAcceleration(this);
 			}
+			System.out.println("vel:");
 			for (IPhysicsTickable obj : universe)
 			{
 				obj.tickVelocity(this);
 			}
+			System.out.println("pos:");
 			for (IPhysicsTickable obj : universe)
 			{
 				obj.tickPosition(this);

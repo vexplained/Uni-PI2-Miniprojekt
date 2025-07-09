@@ -66,6 +66,14 @@ public abstract class Vector2D implements Cloneable
 			}
 
 			/**
+			 * Creates a mutable instance of the given vector.
+			 */
+			public Mutable(Vector2D vector)
+			{
+				super(vector.getX(), vector.getY());
+			}
+
+			/**
 			 * Adds the vector <code>addend</code> to this vector.
 			 * 
 			 * @param addend
@@ -200,6 +208,7 @@ public abstract class Vector2D implements Cloneable
 		@Override
 		public String toString()
 		{
+
 			return "Vector2D.Double[" + x + ", " + y + "]";
 		}
 
@@ -605,5 +614,11 @@ public abstract class Vector2D implements Cloneable
 			return (getX() == v2d.getX()) && (getY() == v2d.getY());
 		}
 		return super.equals(obj);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Vector2D[%d, %d]".formatted(getX(), getY());
 	}
 }

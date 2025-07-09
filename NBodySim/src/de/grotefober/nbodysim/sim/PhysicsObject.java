@@ -1,7 +1,5 @@
 package de.grotefober.nbodysim.sim;
 
-import de.grotefober.nbodysim.sim.Vector2D.Double.Mutable;
-
 // TODO: Refactor to record (performance improvement? Smaller instantiation overhead)
 public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, IPhysicsTickable
 {
@@ -22,17 +20,17 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	/**
 	 * The position of this {@code PhysicsObject}
 	 */
-	protected Vector2D position;
+	protected Vector2D.Double.Mutable position;
 
 	/**
 	 * The velocity of this {@code PhysicsObject}
 	 */
-	protected Vector2D velocity;
+	protected Vector2D.Double.Mutable velocity;
 
 	/**
 	 * The acceleration of this {@code PhysicsObject}
 	 */
-	protected Vector2D acceleration;
+	protected Vector2D.Double.Mutable acceleration;
 
 	/**
 	 * If {@code true}, this object stays fixed in space, i.e. its acceleration, speed or position will not be affected
@@ -41,12 +39,32 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	 */
 	protected boolean isFixed;
 
+	public PhysicsObject(double mass)
+	{
+		this(mass, new Vector2D.Double());
+	}
+
+	public PhysicsObject(double mass, Vector2D initialPosition)
+	{
+		this(mass, initialPosition, new Vector2D.Double());
+	}
+
+	public PhysicsObject(double mass, Vector2D initialPosition, Vector2D initialVelocity)
+	{
+		this.mass = mass;
+		this.position = new Vector2D.Double.Mutable(initialPosition);
+		this.velocity = new Vector2D.Double.Mutable(initialVelocity);
+		this.acceleration = new Vector2D.Double.Mutable();
+	}
+
 	/**
 	 * Update this {@code PhysicsObject}'s acceleration using Newton's second law (F = m*a).
 	 */
 	public void updateAcceleration(Vector2D force)
 	{
 		this.setAcceleration(calcAcceleration(force));
+
+		System.out.println("updateAcc (" + position + "): aNew=" + acceleration);
 	}
 
 	/**
@@ -60,6 +78,8 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 			forceResult.add(force);
 		}
 		this.setAcceleration(calcAcceleration(forceResult));
+
+		System.out.println("updateAcc (" + position + "): aNew=" + acceleration);
 	}
 
 	/**
@@ -84,7 +104,9 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 
 		// TODO optimize to use mutable operations?
 		// Vector2D vNew = vOld.add(this.getAcceleration().scale(timeStep));
-		((Mutable) this.velocity).add(this.acceleration.scale(timeStep));
+		this.velocity.add(this.acceleration.scale(timeStep));
+
+		System.out.println("updateVel (" + position + "): vNew=" + velocity);
 	}
 
 	/**
@@ -96,9 +118,11 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	 * @param timeStep
 	 *            the time step to integrate over, in seconds.
 	 */
-	public void updateLocation(double timeStep)
+	public void updatePosition(double timeStep)
 	{
-		((Mutable) this.position).add(this.velocity.scale(timeStep));
+		this.position.add(this.velocity.scale(timeStep));
+
+		System.out.println("updatePos (" + position + ")");
 	}
 
 	/**
@@ -115,6 +139,10 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 		Vector2D.Double.Mutable forceResult = new Vector2D.Double.Mutable();
 		for (PhysicsObject obj : physMan.getPhysicsShadows())
 		{
+			if (obj.equals(this))
+			{
+				continue;
+			}
 			forceResult.add(this.calcExcertedForce(obj));
 		}
 
@@ -131,7 +159,7 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 	@Override
 	public void tickPosition(PhysicsManager physMan)
 	{
-		updateLocation(physMan.getSimulationTimeStep());
+		updatePosition(physMan.getSimulationTimeStep());
 	}
 
 	@Override
@@ -159,7 +187,7 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 
 	public void setPosition(Vector2D position)
 	{
-		this.position = position;
+		this.position = new Vector2D.Double.Mutable(position);
 	}
 
 	public Vector2D getVelocity()
@@ -169,7 +197,7 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 
 	public void setVelocity(Vector2D velocity)
 	{
-		this.velocity = velocity;
+		this.velocity = new Vector2D.Double.Mutable(velocity);
 	}
 
 	public Vector2D getAcceleration()
@@ -179,7 +207,7 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 
 	public void setAcceleration(Vector2D acceleration)
 	{
-		this.acceleration = acceleration;
+		this.acceleration = new Vector2D.Double.Mutable(acceleration);
 	}
 
 	/**

@@ -8,6 +8,21 @@ import de.grotefober.nbodysim.util.Vector2DUtils;
 public class PhysPointMass extends PhysicsObject
 {
 
+	public PhysPointMass(double mass)
+	{
+		super(mass, new Vector2D.Double());
+	}
+
+	public PhysPointMass(double mass, Vector2D initialPosition)
+	{
+		super(mass, initialPosition, new Vector2D.Double());
+	}
+
+	public PhysPointMass(double mass, Vector2D initialPosition, Vector2D initialVelocity)
+	{
+		super(mass, initialPosition, initialVelocity);
+	}
+
 	@Override
 	public double getGravPotential(Vector2D p)
 	{

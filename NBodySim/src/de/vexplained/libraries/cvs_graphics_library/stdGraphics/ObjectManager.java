@@ -106,6 +106,10 @@ public class ObjectManager
 			periodOrDelay = 1;
 		}
 
+		if (futureTask != null)
+		{
+			futureTask.cancel(false);
+		}
 		if (optimizationApproach == 0)
 		{
 			this.futureTask = tickScheduler.scheduleAtFixedRate(new Runnable()

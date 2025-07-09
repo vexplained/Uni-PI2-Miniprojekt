@@ -1,8 +1,12 @@
 package de.grotefober.nbodysim.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -13,13 +17,26 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 
+import de.grotefober.nbodysim.sim.PhysicsManager;
+import de.grotefober.nbodysim.sim.PhysicsObject;
+import de.grotefober.nbodysim.sim.Vector2D;
+import de.grotefober.nbodysim.sim.physObjects.PhysPointMass;
+import de.grotefober.nbodysim.sim.physObjects.dynObjects.DynamicPhysicsObject;
 import de.grotefober.nbodysim.ui.graphics.PhysicsUniverse2D;
+import de.vexplained.libraries.cvs_graphics_library.stdGraphics.DynamicShape;
+import de.vexplained.libraries.cvs_graphics_library.stdGraphics.dynObjects.DynEllipse;
 
 public class MainGUI
 {
 
+	public static Color COLOR_OBJECT_DEFAULT = new Color(0x02B0E6);
+
 	private JFrame frame;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private PhysicsUniverse2D physUniverse;
+	private PhysicsManager physMan;
+
+	private boolean rdbtnPlaySelected = false;
 
 	/**
 	 * Launch the application.
@@ -49,6 +66,20 @@ public class MainGUI
 	public MainGUI()
 	{
 		initialize();
+		initPhysics();
+	}
+
+	/**
+	 * TODO: Refactor to call this method outside the Swing UI dispatch thread (currently this is called from inside
+	 * EventQueue#invokeLater)
+	 */
+	private void initPhysics()
+	{
+		this.physMan = physUniverse.createPhysicsManager();
+
+		addPhysObject(1230, new Vector2D.Double(150, 150));
+
+		addPhysObject(1230, new Vector2D.Double(300, 300));
 	}
 
 	/**
@@ -68,15 +99,6 @@ public class MainGUI
 		JToggleButton tglbtnToolAddBody = new JToggleButton("Add body");
 		tglbtnToolAddBody.setFocusable(false);
 		tglbtnToolAddBody.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/plus_x32.png")));
-		// try
-		// {
-		// ImageIO.read(getClass().getResource("/resources/images/plus.png"));
-		// } catch (IOException e)
-		// {
-		// // This should never happen. But in case, who cares what happens with this exception?
-		// e.printStackTrace();
-		// }
-		// tglbtnToolAddBody.setIcon(new ImageIcon(MainGUI.class.getResource("/images/plus.png")));
 		tglbtnToolAddBody.setToolTipText("<html>Toggle \"Add body\" tool.<br><i>Shortcut: <kbd>Alt+N</kbd></i></html>");
 		tglbtnToolAddBody.setMnemonic(KeyEvent.VK_N);
 		toolBar.add(tglbtnToolAddBody);
@@ -84,28 +106,88 @@ public class MainGUI
 		JSeparator separator = new JSeparator();
 		toolBar.add(separator);
 
-		JRadioButton rdbtnNewRadioButton = new JRadioButton("Play");
-		rdbtnNewRadioButton.setFocusable(false);
-		rdbtnNewRadioButton
+		JRadioButton rdbtnPlay = new JRadioButton("Play");
+		rdbtnPlay.setFocusable(false);
+		rdbtnPlay
 				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_x32_active.png")));
-		rdbtnNewRadioButton.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_x32.png")));
-		toolBar.add(rdbtnNewRadioButton);
-		buttonGroup.add(rdbtnNewRadioButton);
+		rdbtnPlay.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_x32.png")));
+		toolBar.add(rdbtnPlay);
+		buttonGroup.add(rdbtnPlay);
 
-		JRadioButton rdbtnNewRadioButton_1 = new JRadioButton("Pause");
-		rdbtnNewRadioButton_1.setSelected(true);
-		rdbtnNewRadioButton_1.setFocusable(false);
-		rdbtnNewRadioButton_1.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_x32.png")));
-		rdbtnNewRadioButton_1
+		JRadioButton rdbtnPause = new JRadioButton("Pause");
+		rdbtnPause.setSelected(true);
+		rdbtnPause.setFocusable(false);
+		rdbtnPause.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_x32.png")));
+		rdbtnPause
 				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_x32_active.png")));
-		toolBar.add(rdbtnNewRadioButton_1);
-		buttonGroup.add(rdbtnNewRadioButton_1);
+		toolBar.add(rdbtnPause);
+		buttonGroup.add(rdbtnPause);
 
-		JSeparator separator_1 = new JSeparator();
-		toolBar.add(separator_1);
+		ActionListener alPlayPause = new ActionListener()
+		{
 
-		PhysicsUniverse2D panelCanvas = new PhysicsUniverse2D();
-		frame.getContentPane().add(panelCanvas, BorderLayout.CENTER);
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				if (rdbtnPlay.isSelected() && !rdbtnPlaySelected)
+				{
+					// only enable if previously disabled
+					physMan.enableTickScheduler();
+				} else
+				{
+					try
+					{
+						physMan.disableTickScheduler();
+					} catch (InterruptedException | ExecutionException e1)
+					{
+						// Cull exception
+					}
+				}
+
+				rdbtnPlaySelected = rdbtnPlay.isSelected();
+			}
+		};
+
+		rdbtnPlay.addActionListener(alPlayPause);
+
+		rdbtnPause.addActionListener(alPlayPause);
+
+		// JSeparator separator_1 = new JSeparator();
+		// toolBar.add(separator_1);
+
+		physUniverse = new PhysicsUniverse2D();
+		frame.getContentPane().add(physUniverse, BorderLayout.CENTER);
 	}
 
+	private void addPhysObject(double mass, int x, int y)
+	{
+		addPhysObject(mass, new Vector2D.Double(x, y));
+	}
+
+	private void addPhysObject(double mass, Vector2D position)
+	{
+		addPhysObject(mass, position, new Vector2D.Double());
+	}
+
+	private void addPhysObject(double mass, Vector2D position, Vector2D initialVelocity)
+	{
+		// create new DynObj
+		// create new PhysObj
+		// link DynObj & PhysObj -> DynPhysObj
+		// add DynPhysObj to canvas
+		// register DynPhysObj at PhysicsManager
+		// invalidate canvas?
+
+		double radius = mass / 100D;
+
+		DynamicShape sphere = new DynEllipse(COLOR_OBJECT_DEFAULT, position.getX(), position.getY(), radius * 2,
+				radius * 2);
+		sphere.setFill(COLOR_OBJECT_DEFAULT);
+
+		PhysicsObject physObj = new PhysPointMass(mass, position);
+
+		DynamicPhysicsObject<DynamicShape, PhysicsObject> dynPhysObj = new DynamicPhysicsObject<>(sphere, physObj);
+		physUniverse.addObject(dynPhysObj);
+		physMan.addToTickScheduler(dynPhysObj);
+	}
 }
