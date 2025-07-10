@@ -13,7 +13,7 @@ import de.vexplained.libraries.cvs_graphics_library.stdGraphics.DynamicObject;
  */
 public class DynArrow extends DynamicObject
 {
-	private double x2, y2;
+	protected double x2, y2;
 
 	/**
 	 * @param color

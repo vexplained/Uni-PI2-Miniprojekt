@@ -197,6 +197,7 @@ public abstract class DynamicObject implements IDynamicComponent
 	 * Changes the position of this {@link DynamicObject} instance to new absolute values.
 	 * <br>
 	 * The result of this method is equivalent to calling {@link #setX(double)} and {@link #setY(double)} successively.
+	 * However, using this method reduces the number of redraws from two to one.
 	 * 
 	 * @param x
 	 *            the new x-coordinate
@@ -205,9 +206,26 @@ public abstract class DynamicObject implements IDynamicComponent
 	 */
 	public void moveTo(double x, double y)
 	{
-		setX(x);
-		setY(y);
+		this.x = x;
+		this.y = y;
 		invalidate();
+	}
+
+	/**
+	 * Changes the position of this {@link DynamicObject} instance to new absolute values.
+	 * <br>
+	 * Unlike most other manipulative methods, calling this method <b>does not</b> result in the component tree being
+	 * invalidated and redrawn.
+	 * 
+	 * @param x
+	 *            the new x-coordinate
+	 * @param y
+	 *            the new y-coordinate
+	 */
+	public void setPositionNoUpdate(double x, double y)
+	{
+		this.x = x;
+		this.y = y;
 	}
 
 	/**
@@ -220,8 +238,8 @@ public abstract class DynamicObject implements IDynamicComponent
 	 */
 	public void moveBy(double deltaX, double deltaY)
 	{
-		setX(getX() + deltaX);
-		setY(getY() + deltaY);
+		this.x = getX() + deltaX;
+		this.y = getY() + deltaY;
 		invalidate();
 	}
 

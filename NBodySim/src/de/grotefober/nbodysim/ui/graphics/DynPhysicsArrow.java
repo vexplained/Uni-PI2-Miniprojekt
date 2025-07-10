@@ -55,12 +55,14 @@ public class DynPhysicsArrow extends DynArrow
 		case ACCELERATION -> linkedObject.getAcceleration();
 		case VELOCITY -> linkedObject.getVelocity();
 		};
-		vec = vec.scale(scaleFactor / physMan.DISTANCE_FACTOR);
+		vec = vec.scale(scaleFactor);
 
-		System.out.println(vec);
-		vec = vec.add(linkedObject.getPosition().scale(1 / physMan.DISTANCE_FACTOR));
+		vec = vec.add(linkedObject.getPosition());
+		vec = vec.scale(1 / physMan.DISTANCE_FACTOR);
 
-		this.setTip(vec.getX(), vec.getY());
+		// Do NOT use #setTip because of feedback loop (#setTipps calls #invalidate)
+		this.x2 = vec.getX();
+		this.y2 = vec.getY();
 		super._draw(g2d);
 	}
 }

@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.DynamicObject;
+import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicContainer;
 
 /**
  * Dynamic object containing multiple other dynamic components. The position of all child objects is determined by the
@@ -24,11 +25,23 @@ public class DynCompoundObject extends DynamicObject
 		objSet = Collections.synchronizedSet(new LinkedHashSet<DynamicObject>());
 	}
 
+	@Override
+	public void setParentCanvas(IDynamicContainer parent)
+	{
+		super.setParentCanvas(parent);
+
+		for (DynamicObject obj : objSet)
+		{
+			obj.setParentCanvas(parent);
+		}
+	}
+
 	/**
 	 * See {@link Set#add(Object)}.
 	 */
 	public void addComponent(DynamicObject comp)
 	{
+		comp.setParentCanvas(parentCanvas);
 		objSet.add(comp);
 	}
 
@@ -63,10 +76,8 @@ public class DynCompoundObject extends DynamicObject
 	{
 		for (DynamicObject obj : objSet)
 		{
-			// Synchronize obj's position
-			obj.setX(getX());
-			obj.setY(getY());
-
+			// Synchronize obj's position. #moveTo automatically invalidates the object
+			obj.setPositionNoUpdate(getX(), getY());
 			obj.draw(g2d);
 		}
 	}

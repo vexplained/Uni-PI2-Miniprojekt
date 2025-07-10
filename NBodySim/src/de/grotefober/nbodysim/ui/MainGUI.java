@@ -3,6 +3,7 @@ package de.grotefober.nbodysim.ui;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,12 +15,12 @@ import java.awt.event.KeyEvent;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
@@ -42,20 +43,30 @@ import de.vexplained.libraries.swingextension.logarithmicSlider.LogarithmicJSlid
 
 public class MainGUI
 {
+	/**
+	 * Factor to scale displayed vector by. This is purely for aesthetics.
+	 */
+	public static final double SCALE_FACTOR_ACC = 1000D,
+			SCALE_FACTOR_VEL = 100D;
 
-	public static Color COLOR_OBJECT_DEFAULT = new Color(0x02B0E6), COLOR_SUN = new Color(0xF5B952);
-	private final Stroke crosshairStroke = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL),
-			arrowStroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+	public static Color COLOR_OBJECT_DEFAULT = new Color(0x02B0E6),
+			COLOR_SUN = new Color(0xF5B952),
+			COLOR_VELOCITY = Color.GREEN,
+			COLOR_ACCELERATION = Color.RED;
+	public static final Stroke STROKE_CROSSHAIR = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL),
+			STROKE_ARROW = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
 	private JFrame frame;
-	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private final ButtonGroup btnGroupPlayPause = new ButtonGroup(), btnGroupTools = new NoneSelectableButtonGroup();
 	private PhysicsUniverse2D physUniverse;
 	private PhysicsManager physMan;
+	private InteractionController interactionController;
 
 	private boolean rdbtnPlaySelected = false;
 	private LogarithmicJSlider sliderSimSpeed;
 	private JRadioButton rdbtnPlay;
 	private JRadioButton rdbtnPause;
+	private JToggleButton tglbtnToolAddBody, tglbtnToolDeleteBody;
 
 	/**
 	 * Launch the application.
@@ -84,6 +95,9 @@ public class MainGUI
 	 */
 	public MainGUI()
 	{
+		// Enable font AA
+		System.setProperty("awt.useSystemAAFontSettings", "on");
+
 		initialize();
 
 		initPhysics();
@@ -98,9 +112,13 @@ public class MainGUI
 	private void initPhysics()
 	{
 		this.physMan = physUniverse.createPhysicsManager();
+		setupExample();
+	}
 
+	private void setupExample()
+	{
 		double massSun = 1.98892E30;
-		double massEarth = 5.9722E24 * 10000;
+		double massEarth = 5.9722E24;
 		// addPhysObject(massSun, new Vector2D.Double(300 * physMan.DISTANCE_FACTOR, 300 * physMan.DISTANCE_FACTOR),
 		// false,
 		// COLOR_SUN);
@@ -113,7 +131,7 @@ public class MainGUI
 		double leftTop = borderOffset + center - spacing / 2;
 		double rightBottom = borderOffset + center + spacing / 2;
 
-		double initialVel = 70;
+		double initialVel = 200;
 
 		addPhysObject(massEarth, new Vector2D.Double(leftTop, leftTop).scale(physMan.DISTANCE_FACTOR),
 				new Vector2D.Double(initialVel, -initialVel).scale(physMan.DISTANCE_FACTOR * speedFac),
@@ -128,7 +146,7 @@ public class MainGUI
 				new Vector2D.Double(-initialVel, -initialVel).scale(physMan.DISTANCE_FACTOR * speedFac),
 				false);
 
-		addPhysObject(massEarth * 4,
+		addPhysObject(massSun,
 				new Vector2D.Double(borderOffset + center, borderOffset + center).scale(physMan.DISTANCE_FACTOR), false,
 				COLOR_SUN);
 	}
@@ -138,8 +156,11 @@ public class MainGUI
 	 */
 	private void initialize()
 	{
+		final double preferredToolWidth;
+
 		frame = new JFrame();
 		frame.setBounds(100, 100, 720, 480);
+		// frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JToolBar toolBarLeft = new JToolBar();
@@ -147,41 +168,61 @@ public class MainGUI
 		toolBarLeft.setFocusable(false);
 		frame.getContentPane().add(toolBarLeft, BorderLayout.WEST);
 
-		JToggleButton tglbtnToolAddBody = new JToggleButton("Add body");
+		tglbtnToolAddBody = new JToggleButton("<html>Add body</html>");
 		tglbtnToolAddBody.setFocusable(false);
 		tglbtnToolAddBody.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/plus_x32.png")));
+		tglbtnToolAddBody.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/plus_green_x32.png")));
 		tglbtnToolAddBody.setToolTipText("<html>Toggle \"Add body\" tool.<br><i>Shortcut: <kbd>Alt+N</kbd></i></html>");
 		tglbtnToolAddBody.setMnemonic(KeyEvent.VK_N);
 		toolBarLeft.add(tglbtnToolAddBody);
 
-		JSeparator separator = new JSeparator();
-		toolBarLeft.add(separator);
+		tglbtnToolDeleteBody = new JToggleButton("<html>Delete body</html>");
+		tglbtnToolDeleteBody.setFocusable(false);
+		tglbtnToolDeleteBody.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_x32.png")));
+		tglbtnToolDeleteBody
+				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_red_x32.png")));
+		tglbtnToolDeleteBody
+				.setToolTipText("<html>Toggle \"Add body\" tool.<br><i>Shortcut: <kbd>Alt+N</kbd></i></html>");
+		tglbtnToolDeleteBody.setMnemonic(KeyEvent.VK_N);
+		toolBarLeft.add(tglbtnToolDeleteBody);
+
+		btnGroupTools.add(tglbtnToolAddBody);
+		btnGroupTools.add(tglbtnToolDeleteBody);
+
+		JLabel lblMassInfo = new JLabel("<html><i>Note: Scrolling while on the canvas changes the mass.</i></html>");
+		lblMassInfo.setPreferredSize(tglbtnToolAddBody.getPreferredSize());
+		toolBarLeft.add(lblMassInfo);
+
+		toolBarLeft.addSeparator();
 
 		rdbtnPlay = new JRadioButton("Play");
 		rdbtnPlay.setFocusable(false);
 		rdbtnPlay
-				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_x32_active.png")));
+				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_active_x32.png")));
 		rdbtnPlay.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_x32.png")));
+		rdbtnPlay.setRolloverEnabled(true);
+		rdbtnPlay.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_hover_x32.png")));
 		toolBarLeft.add(rdbtnPlay);
-		buttonGroup.add(rdbtnPlay);
+		btnGroupPlayPause.add(rdbtnPlay);
 
 		rdbtnPause = new JRadioButton("Pause");
 		rdbtnPause.setSelected(true);
 		rdbtnPause.setFocusable(false);
 		rdbtnPause.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_x32.png")));
+		rdbtnPause.setRolloverEnabled(true);
+		rdbtnPause.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_hover_x32.png")));
 		rdbtnPause
-				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_x32_active.png")));
+				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_active_x32.png")));
 		toolBarLeft.add(rdbtnPause);
-		buttonGroup.add(rdbtnPause);
+		btnGroupPlayPause.add(rdbtnPause);
 
-		JSeparator separator_1 = new JSeparator();
-		toolBarLeft.add(separator_1);
+		toolBarLeft.addSeparator();
 
-		JToggleButton tglbtnChangeRule = new JToggleButton("Change magic rule");
+		JToggleButton tglbtnChangeRule = new JToggleButton("<html>Change magic rule</html>");
+		tglbtnChangeRule.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_x32.png")));
+		tglbtnChangeRule
+				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_colorful_x32.png")));
 		toolBarLeft.add(tglbtnChangeRule);
-
-		// JSeparator separator_1 = new JSeparator();
-		// toolBar.add(separator_1);
 
 		physUniverse = new PhysicsUniverse2D();
 		frame.getContentPane().add(physUniverse, BorderLayout.CENTER);
@@ -208,6 +249,7 @@ public class MainGUI
 
 		sliderSimSpeed = new LogarithmicJSlider();
 		sliderSimSpeed.setMinimum(1);
+		sliderSimSpeed.setMaximum(50);
 		sliderSimSpeed.setValue(2);
 		sliderSimSpeed.setPaintTicks(true);
 		sliderSimSpeed.setPaintLabels(true);
@@ -218,6 +260,14 @@ public class MainGUI
 		gbc_sliderSimSpeed.gridx = 0;
 		gbc_sliderSimSpeed.gridy = 1;
 		panel.add(sliderSimSpeed, gbc_sliderSimSpeed);
+
+		preferredToolWidth = tglbtnToolDeleteBody.getPreferredSize().getWidth();
+		Dimension preferredToolSize = tglbtnToolDeleteBody.getPreferredSize();
+		tglbtnToolAddBody.setPreferredSize(preferredToolSize);
+		lblMassInfo.setPreferredSize(preferredToolSize);
+		rdbtnPlay.setPreferredSize(preferredToolSize);
+		rdbtnPause.setPreferredSize(preferredToolSize);
+		tglbtnChangeRule.setPreferredSize(preferredToolSize);
 	}
 
 	/**
@@ -272,29 +322,50 @@ public class MainGUI
 				// physMan.enableTickScheduler();
 			}
 		});
+
+		// =====================================
+		// Listeners for interacting with canvas
+		// =====================================
+
+		interactionController = new InteractionController(physUniverse, physMan, this);
+
+		ActionListener alTool = new ActionListener()
+		{
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				interactionController.setAction(
+						tglbtnToolAddBody.isSelected() ? EInteractionAction.ADD_OBJECT : EInteractionAction.NONE);
+			}
+		};
+
+		tglbtnToolAddBody.addActionListener(alTool);
+		tglbtnToolDeleteBody.addActionListener(alTool);
+
 	}
 
-	private void addPhysObject(double mass, int x, int y, boolean fixed)
+	public void addPhysObject(double mass, int x, int y, boolean fixed)
 	{
 		addPhysObject(mass, new Vector2D.Double(x, y), fixed);
 	}
 
-	private void addPhysObject(double mass, Vector2D position, boolean fixed)
+	public void addPhysObject(double mass, Vector2D position, boolean fixed)
 	{
 		addPhysObject(mass, position, fixed, COLOR_OBJECT_DEFAULT);
 	}
 
-	private void addPhysObject(double mass, Vector2D position, boolean fixed, Color color)
+	public void addPhysObject(double mass, Vector2D position, boolean fixed, Color color)
 	{
 		addPhysObject(mass, position, new Vector2D.Double(), fixed, color);
 	}
 
-	private void addPhysObject(double mass, Vector2D position, Vector2D initialVelocity, boolean fixed)
+	public void addPhysObject(double mass, Vector2D position, Vector2D initialVelocity, boolean fixed)
 	{
 		addPhysObject(mass, position, initialVelocity, fixed, COLOR_OBJECT_DEFAULT);
 	}
 
-	private void addPhysObject(double mass, Vector2D position, Vector2D initalVelocity, boolean fixed, Color color)
+	public void addPhysObject(double mass, Vector2D position, Vector2D initalVelocity, boolean fixed, Color color)
 	{
 		// create new DynObj
 		// create new PhysObj
@@ -307,20 +378,22 @@ public class MainGUI
 		physObj.setFixed(fixed);
 		physObj.setVelocity(initalVelocity);
 
-		double radius = Math.cbrt(mass) / 1E8D;
+		// Scale objects with 10x mass to 1.5x the radius
+		double radius = radiusFromMass(mass);
+		// double radius = Math.pow(2, Math.log10(mass / 1E20));
 
 		// Position of these objects doesn't matter; only set pos of DynCompoundObject
 		DynamicShape sphere = new DynCenteredEllipse(color, 0, 0, radius * 2,
 				radius * 2);
 		sphere.setFill(color);
-		DynCrosshair crosshair = new DynCrosshair(Color.RED, 0, 0, 1, 8, crosshairStroke);
+		DynCrosshair crosshair = new DynCrosshair(Color.RED, 0, 0, 1, 8, STROKE_CROSSHAIR);
 
 		DynPhysicsArrow arrowAccel = new DynPhysicsArrow(Color.RED, 0, 0, 0, 0, physObj,
-				DynPhysicsArrow.ELinkedProperty.ACCELERATION, physMan);
+				DynPhysicsArrow.ELinkedProperty.ACCELERATION, physMan, SCALE_FACTOR_ACC);
 		DynPhysicsArrow arrowSpeed = new DynPhysicsArrow(Color.GREEN, 0, 0, 0, 0, physObj,
-				DynPhysicsArrow.ELinkedProperty.VELOCITY, physMan, 100);
-		arrowAccel.setStroke(arrowStroke);
-		arrowSpeed.setStroke(arrowStroke);
+				DynPhysicsArrow.ELinkedProperty.VELOCITY, physMan, SCALE_FACTOR_VEL);
+		arrowAccel.setStroke(STROKE_ARROW);
+		arrowSpeed.setStroke(STROKE_ARROW);
 
 		DynCompoundObject visibleObj = new DynCompoundObject(Color.BLACK, position.getX(), position.getY());
 		visibleObj.addComponent(sphere);
@@ -332,5 +405,34 @@ public class MainGUI
 				physMan.DISTANCE_FACTOR);
 		physUniverse.addObject(dynPhysObj);
 		physMan.addToTickScheduler(dynPhysObj);
+	}
+
+	public static double radiusFromMass(double mass)
+	{
+		return Math.pow(Math.log1p(mass / 1E5), 1.1);
+	}
+}
+
+/**
+ * ButtonGroup which permits to have no selection at all. Useful for groups of toggle buttons where <i>at most</i> one
+ * button shall be selected.
+ * 
+ * @see https://stackoverflow.com/a/16731838
+ */
+class NoneSelectableButtonGroup extends ButtonGroup
+{
+
+	private static final long serialVersionUID = 8890764343014111689L;
+
+	@Override
+	public void setSelected(ButtonModel model, boolean selected)
+	{
+		if (selected)
+		{
+			super.setSelected(model, selected);
+		} else
+		{
+			clearSelection();
+		}
 	}
 }
