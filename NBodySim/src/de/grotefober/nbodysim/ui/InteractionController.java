@@ -6,14 +6,18 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.HashMap;
 
 import de.grotefober.nbodysim.sim.PhysicsManager;
 import de.grotefober.nbodysim.sim.PhysicsObject;
 import de.grotefober.nbodysim.sim.Vector2D;
 import de.grotefober.nbodysim.sim.physObjects.PhysPointMass;
-import de.grotefober.nbodysim.sim.physObjects.dynObjects.DynCenteredEllipse;
 import de.grotefober.nbodysim.ui.graphics.DynCompoundObject;
 import de.grotefober.nbodysim.ui.graphics.PhysicsUniverse2D;
+import de.grotefober.nbodysim.ui.graphics.dynObjects.DynCenteredEllipse;
+import de.grotefober.nbodysim.ui.graphics.dynObjects.DynamicPhysicsObject;
+import de.vexplained.libraries.cvs_graphics_library.stdGraphics.DynamicObject;
+import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicComponent;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.dynObjects.DynArrow;
 
 public class InteractionController
@@ -36,6 +40,12 @@ public class InteractionController
 	private DynArrow pseudoArrow;
 	private DynCenteredEllipse pseudoBody;
 
+	/**
+	 * HashMap holding all objects marked for deletion as well as their previous color to restore their original color
+	 * when no longer highlighting them.
+	 */
+	private HashMap<IDynamicComponent, Color> deleteCache;
+
 	public InteractionController(PhysicsUniverse2D physicsUniverse, PhysicsManager physMan, MainGUI gui)
 	{
 		this.physUniverse = physicsUniverse;
@@ -46,6 +56,8 @@ public class InteractionController
 		this.mouseWheelCounter = 0;
 		this.positionCache = new int[4][2]; // Cache can hold up to 4 mouse positions
 		this.currentAction = EInteractionAction.NONE;
+
+		this.deleteCache = new HashMap<>(4);
 
 		PhysicsObject physShadow = new PhysPointMass(0);
 
@@ -76,7 +88,10 @@ public class InteractionController
 			public void mouseClicked(MouseEvent e)
 			{
 				super.mouseClicked(e);
-				handleMouseClicked(e);
+				if (e.getButton() == MouseEvent.BUTTON1)
+				{
+					handleMouseClicked(e);
+				}
 			}
 		});
 
@@ -125,7 +140,8 @@ public class InteractionController
 	{
 		if (clickCounter == 0)
 		{
-			mouseWheelCounter = 0;
+			// don't reset; keep size
+			// mouseWheelCounter = 0;
 		}
 
 		switch (currentAction)
@@ -163,6 +179,32 @@ public class InteractionController
 			pseudoArrow.setTip(positionCache[1][0], positionCache[1][1]);
 			break;
 		case DELETE_OBJECT:
+			synchronized (deleteCache)
+			{
+				deleteCache.clear();
+			}
+
+			for (DynamicPhysicsObject comp : physUniverse.getDynPhysicsObjects())
+			{
+				DynamicObject obj = comp.getDynamicObject();
+				if (obj.isInShape(e.getX(), e.getY()))
+				{
+					System.out.println("in shape");
+					deleteCache.put(comp, obj.getColor());
+					obj.setColor(MainGUI.COLOR_HIGHLIGHT);
+					if (obj instanceof DynCompoundObject)
+					{
+						((DynCompoundObject) obj).setOutlineVisible(true);
+					}
+				} else
+				{
+					System.out.println("n");
+					if (obj instanceof DynCompoundObject)
+					{
+						((DynCompoundObject) obj).setOutlineVisible(false);
+					}
+				}
+			}
 			break;
 		}
 	}
@@ -211,10 +253,13 @@ public class InteractionController
 			System.out.println("pos: %s \t vel: %s".formatted(pos, vel));
 			gui.addPhysObject(mass, pos, vel.scale(1 / MainGUI.SCALE_FACTOR_VEL), false, MainGUI.COLOR_OBJECT_DEFAULT);
 
+			// keep modified size until exiting "add object" mode
+			// TODO: (hacky)
+			double mouseWheelCounterTemp = mouseWheelCounter;
 			handleReset();
+			mouseWheelCounter = mouseWheelCounterTemp;
+			handleMassModified();
 		}
-
-		System.out.println(pseudoObject.isVisible() + " " + pseudoArrow.isVisible());
 	}
 
 	private void handleReset()

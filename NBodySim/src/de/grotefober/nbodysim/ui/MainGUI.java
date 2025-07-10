@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,11 +34,11 @@ import de.grotefober.nbodysim.sim.PhysicsManager;
 import de.grotefober.nbodysim.sim.PhysicsObject;
 import de.grotefober.nbodysim.sim.Vector2D;
 import de.grotefober.nbodysim.sim.physObjects.PhysPointMass;
-import de.grotefober.nbodysim.sim.physObjects.dynObjects.DynCenteredEllipse;
-import de.grotefober.nbodysim.sim.physObjects.dynObjects.DynamicPhysicsObject;
 import de.grotefober.nbodysim.ui.graphics.DynCompoundObject;
 import de.grotefober.nbodysim.ui.graphics.DynPhysicsArrow;
 import de.grotefober.nbodysim.ui.graphics.PhysicsUniverse2D;
+import de.grotefober.nbodysim.ui.graphics.dynObjects.DynCenteredEllipse;
+import de.grotefober.nbodysim.ui.graphics.dynObjects.DynamicPhysicsObject;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.DynamicObject;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.DynamicShape;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.dynObjects.DynCrosshair;
@@ -54,7 +55,8 @@ public class MainGUI
 	public static Color COLOR_OBJECT_DEFAULT = new Color(0x02B0E6),
 			COLOR_SUN = new Color(0xF5B952),
 			COLOR_VELOCITY = Color.GREEN,
-			COLOR_ACCELERATION = Color.RED;
+			COLOR_ACCELERATION = Color.RED,
+			COLOR_HIGHLIGHT = new Color(0xff6666);
 	public static final Stroke STROKE_CROSSHAIR = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL),
 			STROKE_ARROW = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
@@ -74,9 +76,13 @@ public class MainGUI
 	private static boolean letTheMagicHappen = false;
 	private DynamicPhysicsObject<DynCenteredEllipse, PhysPointMass> magicObject;
 
-	private JToggleButton tglbtnChangeRule;
+	private JToggleButton tglbtnMagic;
 
 	private PhysPointMass magicMass;
+
+	private JButton btnReset;
+
+	private JButton btnClear;
 
 	/**
 	 * Launch the application.
@@ -135,27 +141,26 @@ public class MainGUI
 		// false,
 		// COLOR_SUN);
 
-		double speedFac = 0.008;
-
 		double borderOffset = 100;
 		double center = 400;
 		double spacing = 400;
 		double leftTop = borderOffset + center - spacing / 2;
 		double rightBottom = borderOffset + center + spacing / 2;
 
-		double initialVel = 200;
+		double speedFac = 0.008;
+		double initialVel = 250 * speedFac;
 
 		addPhysObject(massEarth, new Vector2D.Double(leftTop, leftTop).scale(physMan.DISTANCE_FACTOR),
-				new Vector2D.Double(initialVel, -initialVel).scale(physMan.DISTANCE_FACTOR * speedFac),
+				new Vector2D.Double(initialVel, -initialVel).scale(physMan.DISTANCE_FACTOR),
 				false);
 		addPhysObject(massEarth, new Vector2D.Double(rightBottom, leftTop).scale(physMan.DISTANCE_FACTOR),
-				new Vector2D.Double(initialVel, initialVel).scale(physMan.DISTANCE_FACTOR * speedFac),
+				new Vector2D.Double(initialVel, initialVel).scale(physMan.DISTANCE_FACTOR),
 				false);
 		addPhysObject(massEarth, new Vector2D.Double(rightBottom, rightBottom).scale(physMan.DISTANCE_FACTOR),
-				new Vector2D.Double(-initialVel, initialVel).scale(physMan.DISTANCE_FACTOR * speedFac),
+				new Vector2D.Double(-initialVel, initialVel).scale(physMan.DISTANCE_FACTOR),
 				false);
 		addPhysObject(massEarth, new Vector2D.Double(leftTop, rightBottom).scale(physMan.DISTANCE_FACTOR),
-				new Vector2D.Double(-initialVel, -initialVel).scale(physMan.DISTANCE_FACTOR * speedFac),
+				new Vector2D.Double(-initialVel, -initialVel).scale(physMan.DISTANCE_FACTOR),
 				false);
 
 		addPhysObject(massSun,
@@ -171,7 +176,7 @@ public class MainGUI
 		final double preferredToolWidth;
 
 		frame = new JFrame();
-		frame.setBounds(100, 100, 720, 480);
+		frame.setBounds(100, 100, 1280, 960);
 		// frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -183,18 +188,25 @@ public class MainGUI
 		tglbtnToolAddBody = new JToggleButton("<html>Add body</html>");
 		tglbtnToolAddBody.setFocusable(false);
 		tglbtnToolAddBody.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/plus_x32.png")));
+		tglbtnToolAddBody.setRolloverEnabled(true);
+		tglbtnToolAddBody.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/plus_hover_x32.png")));
 		tglbtnToolAddBody.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/plus_green_x32.png")));
 		tglbtnToolAddBody.setToolTipText("<html>Toggle \"Add body\" tool.<br><i>Shortcut: <kbd>Alt+N</kbd></i></html>");
 		tglbtnToolAddBody.setMnemonic(KeyEvent.VK_N);
+		tglbtnToolAddBody.setHorizontalAlignment(SwingConstants.LEADING);
 		toolBarLeft.add(tglbtnToolAddBody);
 
 		tglbtnToolDeleteBody = new JToggleButton("<html>Delete body</html>");
 		tglbtnToolDeleteBody.setFocusable(false);
 		tglbtnToolDeleteBody.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_x32.png")));
+		tglbtnToolDeleteBody.setRolloverEnabled(true);
+		tglbtnToolDeleteBody
+				.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_hover_x32.png")));
 		tglbtnToolDeleteBody
 				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_red_x32.png")));
 		tglbtnToolDeleteBody
 				.setToolTipText("<html>Toggle \"Add body\" tool.<br><i>Shortcut: <kbd>Alt+N</kbd></i></html>");
+		tglbtnToolDeleteBody.setHorizontalAlignment(SwingConstants.LEADING);
 		tglbtnToolDeleteBody.setMnemonic(KeyEvent.VK_N);
 		toolBarLeft.add(tglbtnToolDeleteBody);
 
@@ -214,6 +226,7 @@ public class MainGUI
 		rdbtnPlay.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_x32.png")));
 		rdbtnPlay.setRolloverEnabled(true);
 		rdbtnPlay.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_hover_x32.png")));
+		rdbtnPlay.setHorizontalAlignment(SwingConstants.LEADING);
 		toolBarLeft.add(rdbtnPlay);
 		btnGroupPlayPause.add(rdbtnPlay);
 
@@ -223,18 +236,39 @@ public class MainGUI
 		rdbtnPause.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_x32.png")));
 		rdbtnPause.setRolloverEnabled(true);
 		rdbtnPause.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_hover_x32.png")));
-		rdbtnPause
-				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_active_x32.png")));
+		rdbtnPause.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_active_x32.png")));
+		rdbtnPause.setHorizontalAlignment(SwingConstants.LEADING);
 		toolBarLeft.add(rdbtnPause);
 		btnGroupPlayPause.add(rdbtnPause);
 
 		toolBarLeft.addSeparator();
 
-		tglbtnChangeRule = new JToggleButton("<html>Change magic rule</html>");
-		tglbtnChangeRule.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_x32.png")));
-		tglbtnChangeRule
+		tglbtnMagic = new JToggleButton("<html>Change magic rule</html>");
+		tglbtnMagic.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_x32.png")));
+		tglbtnMagic.setRolloverEnabled(true);
+		tglbtnMagic.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_hover_x32.png")));
+		tglbtnMagic
 				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_colorful_x32.png")));
-		toolBarLeft.add(tglbtnChangeRule);
+		tglbtnMagic.setHorizontalAlignment(SwingConstants.LEADING);
+		toolBarLeft.add(tglbtnMagic);
+
+		toolBarLeft.addSeparator();
+
+		btnReset = new JButton("<html>Reset</html>");
+		btnReset.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/reset_x32.png")));
+		btnReset.setRolloverEnabled(true);
+		btnReset.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/reset_hover_x32.png")));
+		btnReset.setPressedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/reset_active_x32.png")));
+		btnReset.setHorizontalAlignment(SwingConstants.LEADING);
+		toolBarLeft.add(btnReset);
+
+		btnClear = new JButton("<html>Clear canvas</html>");
+		btnClear.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_x32.png")));
+		btnClear.setRolloverEnabled(true);
+		btnClear.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_hover_x32.png")));
+		btnClear.setPressedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_red_x32.png")));
+		btnClear.setHorizontalAlignment(SwingConstants.LEADING);
+		toolBarLeft.add(btnClear);
 
 		physUniverse = new PhysicsUniverse2D();
 		frame.getContentPane().add(physUniverse, BorderLayout.CENTER);
@@ -279,7 +313,7 @@ public class MainGUI
 		lblMassInfo.setPreferredSize(preferredToolSize);
 		rdbtnPlay.setPreferredSize(preferredToolSize);
 		rdbtnPause.setPreferredSize(preferredToolSize);
-		tglbtnChangeRule.setPreferredSize(preferredToolSize);
+		tglbtnMagic.setPreferredSize(preferredToolSize);
 	}
 
 	/**
@@ -335,13 +369,13 @@ public class MainGUI
 			}
 		});
 
-		tglbtnChangeRule.addChangeListener(new ChangeListener()
+		tglbtnMagic.addChangeListener(new ChangeListener()
 		{
 
 			@Override
 			public void stateChanged(ChangeEvent e)
 			{
-				letTheMagicHappen = tglbtnChangeRule.isSelected();
+				letTheMagicHappen = tglbtnMagic.isSelected();
 				if (letTheMagicHappen)
 				{
 					magicMass.setMass(-1E30);
@@ -352,6 +386,29 @@ public class MainGUI
 			}
 		});
 
+		btnClear.addActionListener(new ActionListener()
+		{
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				clearCanvas();
+			}
+		});
+
+		btnReset.addActionListener(new ActionListener()
+		{
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				clearCanvas();
+
+				setupExample();
+			}
+		});
+
+		// Magic listener
 		physUniverse.addMouseMotionListener(new MouseMotionAdapter()
 		{
 
@@ -361,7 +418,9 @@ public class MainGUI
 				if (letTheMagicHappen)
 				{
 					magicMass.setPosition(new Vector2D.Double(e.getX(), e.getY()).scale(physMan.DISTANCE_FACTOR));
+
 				}
+				magicObject.setVisible(letTheMagicHappen);
 			}
 		});
 
@@ -377,8 +436,15 @@ public class MainGUI
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				interactionController.setAction(
-						tglbtnToolAddBody.isSelected() ? EInteractionAction.ADD_OBJECT : EInteractionAction.NONE);
+				EInteractionAction action = EInteractionAction.NONE;
+				if (tglbtnToolAddBody.isSelected())
+				{
+					action = EInteractionAction.ADD_OBJECT;
+				} else if (tglbtnToolDeleteBody.isSelected())
+				{
+					action = EInteractionAction.DELETE_OBJECT;
+				}
+				interactionController.setAction(action);
 			}
 		};
 
@@ -387,11 +453,26 @@ public class MainGUI
 
 	}
 
+	private void clearCanvas()
+	{
+		rdbtnPause.doClick();
+
+		try
+		{
+			physMan.disableTickScheduler();
+		} catch (InterruptedException | ExecutionException e1)
+		{
+			e1.printStackTrace();
+		}
+		physMan.removeAll();
+		physUniverse.removeAllObjects();
+	}
+
 	private void setupMagic()
 	{
 		magicMass = new PhysPointMass(0);
 		magicMass.setFixed(true);
-		DynCenteredEllipse magicBody = new DynCenteredEllipse(Color.WHITE, 0, 0, 10, 10);
+		DynCenteredEllipse magicBody = new DynCenteredEllipse(Color.WHITE, 0, 0, 6, 6);
 
 		magicObject = new DynamicPhysicsObject<DynCenteredEllipse, PhysPointMass>(magicBody, magicMass,
 				physMan.DISTANCE_FACTOR);

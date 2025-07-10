@@ -1,4 +1,4 @@
-package de.grotefober.nbodysim.sim.physObjects.dynObjects;
+package de.grotefober.nbodysim.ui.graphics.dynObjects;
 
 import java.awt.Graphics2D;
 

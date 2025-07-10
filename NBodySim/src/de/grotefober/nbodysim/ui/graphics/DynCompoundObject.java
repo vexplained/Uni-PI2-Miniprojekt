@@ -18,6 +18,8 @@ public class DynCompoundObject extends DynamicObject
 
 	Set<DynamicObject> objSet;
 
+	private boolean showOutline;
+
 	public DynCompoundObject(Color color, double x, double y)
 	{
 		super(color, x, y);
@@ -34,6 +36,16 @@ public class DynCompoundObject extends DynamicObject
 		{
 			obj.setParentCanvas(parent);
 		}
+	}
+
+	public boolean isOutlineVisible()
+	{
+		return showOutline;
+	}
+
+	public void setOutlineVisible(boolean showOutline)
+	{
+		this.showOutline = showOutline;
 	}
 
 	/**
@@ -78,7 +90,29 @@ public class DynCompoundObject extends DynamicObject
 		{
 			// Synchronize obj's position. #moveTo automatically invalidates the object
 			obj.setPositionNoUpdate(getX(), getY());
+			if (!showOutline)
+			{
+				obj.draw(g2d);
+			} else
+			{
+				drawOutline(g2d);
+			}
+		}
+
+	}
+
+	/**
+	 * This call is expensive. Use sparingly.
+	 */
+	private void drawOutline(Graphics2D g2d)
+	{
+		Color colorTemp;
+		for (DynamicObject obj : objSet)
+		{
+			colorTemp = obj.getColor();
+			obj.setColor(color);
 			obj.draw(g2d);
+			obj.setColor(colorTemp);
 		}
 	}
 

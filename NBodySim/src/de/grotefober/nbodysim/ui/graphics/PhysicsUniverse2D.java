@@ -15,7 +15,7 @@ import java.util.Set;
 import javax.swing.JPanel;
 
 import de.grotefober.nbodysim.sim.PhysicsManager;
-import de.grotefober.nbodysim.sim.physObjects.dynObjects.DynamicPhysicsObject;
+import de.grotefober.nbodysim.ui.graphics.dynObjects.DynamicPhysicsObject;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicComponent;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.IDynamicContainer;
 

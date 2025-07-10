@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.grotefober.nbodysim.sim.physObjects.dynObjects.DynamicPhysicsObject;
 import de.grotefober.nbodysim.ui.graphics.PhysicsUniverse2D;
+import de.grotefober.nbodysim.ui.graphics.dynObjects.DynamicPhysicsObject;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ITickable;
 import de.vexplained.libraries.cvs_graphics_library.stdGraphics.ObjectManager;
 

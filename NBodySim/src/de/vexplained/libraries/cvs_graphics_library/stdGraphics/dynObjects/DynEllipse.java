@@ -46,13 +46,17 @@ public class DynEllipse extends DynamicShape
 	@Override
 	public boolean isInShape(double x, double y)
 	{
+		// equation is for ellipse centered at (this.x, this.y)
+		x -= w / 2;
+		y -= h / 2;
+
 		// if > 1: outside
 		// if == 1: on outline
 		// if < 1: inside
 		// @see
 		// https://www.geeksforgeeks.org/check-if-a-point-is-inside-outside-or-on-the-ellipse/
-		return (((int) Math.pow((x - this.x), 2) / (int) Math.pow(w, 2))
-				+ ((int) Math.pow((y - this.y), 2) / (int) Math.pow(h, 2))) < 1;
+		return (((int) Math.pow((x - this.x), 2) / (int) Math.pow(w / 2, 2))
+				+ ((int) Math.pow((y - this.y), 2) / (int) Math.pow(h / 2, 2))) < 1;
 	}
 
 	@Override

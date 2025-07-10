@@ -1,4 +1,4 @@
-package de.grotefober.nbodysim.sim.physObjects.dynObjects;
+package de.grotefober.nbodysim.ui.graphics.dynObjects;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -47,15 +47,13 @@ public class DynCenteredEllipse extends DynamicShape
 	@Override
 	public boolean isInShape(double x, double y)
 	{
-		x -= w / 2d;
-		y -= h / 2d;
 		// if > 1: outside
 		// if == 1: on outline
 		// if < 1: inside
 		// @see
 		// https://www.geeksforgeeks.org/check-if-a-point-is-inside-outside-or-on-the-ellipse/
-		return (((int) Math.pow((x - this.x), 2) / (int) Math.pow(w, 2))
-				+ ((int) Math.pow((y - this.y), 2) / (int) Math.pow(h, 2))) < 1;
+		return (Math.pow((x - this.x), 2) / Math.pow(w / 2, 2))
+				+ (Math.pow((y - this.y), 2) / Math.pow(h / 2, 2)) <= 1;
 	}
 
 	@Override
