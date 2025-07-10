@@ -37,7 +37,7 @@ public class PhysPointMass extends PhysicsObject
 
 		// if (MainGUI.isLetTheMagicHappen())
 		// {
-		// // diff = diff.rotate(Math.PI / 2D);
+		// diff = diff.rotate(Math.PI / 2D);
 		//
 		// return diff.scale(PhysicsConstants.G * this.getMass() * other.getMass()
 		// / Vector2DUtils.distCubed(other.getPosition(), this.getPosition()));

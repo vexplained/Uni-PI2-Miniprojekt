@@ -1,6 +1,7 @@
 package de.grotefober.nbodysim.sim;
 
 import de.grotefober.nbodysim.sim.Vector2D.Double;
+import de.grotefober.nbodysim.ui.MainGUI;
 
 // TODO: Refactor to record (performance improvement? Smaller instantiation overhead)
 public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, IPhysicsTickable
@@ -148,20 +149,37 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 			forceResult.add(this.calcExcertedForce(obj));
 		}
 
+		if (MainGUI.isLetTheMagicHappen())
+		{
+			forceResult.scale(-1);
+		}
+
 		updateAcceleration(new Vector2D.Double(forceResult), physMan.ACCEL_CAP); // "remove" mutable properties
 	}
 
 	@Override
 	public void tickVelocity(PhysicsManager physMan)
 	{
-		updateVelocity(physMan.getSimulationTimeStep(), physMan.VELOCITY_CAP);
+		if (MainGUI.isLetTheMagicHappen())
+		{
+			updateVelocity(-physMan.getSimulationTimeStep(), physMan.VELOCITY_CAP);
+		} else
+		{
+			updateVelocity(physMan.getSimulationTimeStep(), physMan.VELOCITY_CAP);
+		}
 
 	}
 
 	@Override
 	public void tickPosition(PhysicsManager physMan)
 	{
-		updatePosition(physMan.getSimulationTimeStep());
+		if (MainGUI.isLetTheMagicHappen())
+		{
+			updatePosition(-physMan.getSimulationTimeStep());
+		} else
+		{
+			updatePosition(physMan.getSimulationTimeStep());
+		}
 	}
 
 	@Override

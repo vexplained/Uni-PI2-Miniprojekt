@@ -27,6 +27,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -83,6 +85,37 @@ public class MainGUI
 	private JButton btnReset;
 
 	private JButton btnClear;
+	private JButton btnInfo;
+
+	private InfoFrame infoFrame;
+
+	private static final String infoString = "<h1>N-body 2D physics simulation</h1>"
+			+ "<p>"
+			+ "This project is a simple n-body physics simulation using the explicit Euler method for approximating velocity and position of simulated objects.<br>"
+			+ "In many ways, this implementation is modular. Currently, all physics objects are approximated as point masses. However, other objects with different physical properties may be implemented as desired."
+			+ "</p>"
+			+ "<h2>Motto</h2>"
+			+ "<p>"
+			+ "As a creative motto device, we incorporated two of the three examples:"
+			+ "<ol>"
+			+ "<li> <i>Two Things That Shouldn't Go Together</i>: When enabled, the mouse acts as a <i>white hole</i>, repelling all physics objects on the canvas."
+			+ "<li> <i>One Rule Changes Everything</i>: When enabled, the simulation is (sort of) played in reverse: The time delta for the explicit Euler method is negated (negative time step) and acceleration is applied backwards. This creates the illusion of reversing time."
+			+ "</ol>"
+			+ "</p>"
+			+ "<h2>Libary usage</h2>"
+			+ "<p>"
+			+ "This project extensively uses an already existing canvas library previously created by me (Levin Fober). The library was designed for dynamic display of various shapes and symbols without having to worry about the underlying painting pipeline.<br>"
+			+ "However, in the course of this development, we both modified parts of the library to enable better extensibility. Namely, the inheritance hierarchy of <code>DynamicObject</code>s was fully refactored to use interfaces instead. Similar adaptions followed."
+			+ "</p>"
+			+ "<h2>Authors</h2>"
+			+ "<p>"
+			+ "Levin Fober<br>"
+			+ "Felix Grote"
+			+ "</p>"
+			+ "<hr>"
+			+ "<p>"
+			+ "<i>A project for </i>Praktische Informatik II<i> at University of Tübingen.</i>"
+			+ "</p>";
 
 	/**
 	 * Launch the application.
@@ -175,6 +208,16 @@ public class MainGUI
 	{
 		final double preferredToolWidth;
 
+		try
+		{
+			UIManager.setLookAndFeel(
+					UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e)
+		{
+			e.printStackTrace();
+		}
+
 		frame = new JFrame();
 		frame.setBounds(100, 100, 1280, 960);
 		// frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -186,7 +229,6 @@ public class MainGUI
 		frame.getContentPane().add(toolBarLeft, BorderLayout.WEST);
 
 		tglbtnToolAddBody = new JToggleButton("<html>Add body</html>");
-		tglbtnToolAddBody.setFocusable(false);
 		tglbtnToolAddBody.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/plus_x32.png")));
 		tglbtnToolAddBody.setRolloverEnabled(true);
 		tglbtnToolAddBody.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/plus_hover_x32.png")));
@@ -197,7 +239,6 @@ public class MainGUI
 		toolBarLeft.add(tglbtnToolAddBody);
 
 		tglbtnToolDeleteBody = new JToggleButton("<html>Delete body</html>");
-		tglbtnToolDeleteBody.setFocusable(false);
 		tglbtnToolDeleteBody.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_x32.png")));
 		tglbtnToolDeleteBody.setRolloverEnabled(true);
 		tglbtnToolDeleteBody
@@ -205,9 +246,9 @@ public class MainGUI
 		tglbtnToolDeleteBody
 				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_red_x32.png")));
 		tglbtnToolDeleteBody
-				.setToolTipText("<html>Toggle \"Add body\" tool.<br><i>Shortcut: <kbd>Alt+N</kbd></i></html>");
+				.setToolTipText("<html>Toggle \"Delete body\" tool.<br><i>Shortcut: <kbd>Alt+D</kbd></i></html>");
 		tglbtnToolDeleteBody.setHorizontalAlignment(SwingConstants.LEADING);
-		tglbtnToolDeleteBody.setMnemonic(KeyEvent.VK_N);
+		tglbtnToolDeleteBody.setMnemonic(KeyEvent.VK_D);
 		toolBarLeft.add(tglbtnToolDeleteBody);
 
 		btnGroupTools.add(tglbtnToolAddBody);
@@ -220,7 +261,6 @@ public class MainGUI
 		toolBarLeft.addSeparator();
 
 		rdbtnPlay = new JRadioButton("Play");
-		rdbtnPlay.setFocusable(false);
 		rdbtnPlay
 				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_active_x32.png")));
 		rdbtnPlay.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/play_x32.png")));
@@ -232,7 +272,6 @@ public class MainGUI
 
 		rdbtnPause = new JRadioButton("Pause");
 		rdbtnPause.setSelected(true);
-		rdbtnPause.setFocusable(false);
 		rdbtnPause.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_x32.png")));
 		rdbtnPause.setRolloverEnabled(true);
 		rdbtnPause.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/pause_hover_x32.png")));
@@ -243,7 +282,9 @@ public class MainGUI
 
 		toolBarLeft.addSeparator();
 
-		tglbtnMagic = new JToggleButton("<html>Change magic rule</html>");
+		tglbtnMagic = new JToggleButton("<html>Apply some magic</html>");
+		tglbtnMagic.setToolTipText(
+				"<html>Apply a couple of magic rules.<br>\r\nAdditionally, the cursor now acts as a <i>white hole</i>, repelling all other objects on the canvas.</html>");
 		tglbtnMagic.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_x32.png")));
 		tglbtnMagic.setRolloverEnabled(true);
 		tglbtnMagic.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_hover_x32.png")));
@@ -251,6 +292,14 @@ public class MainGUI
 				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_colorful_x32.png")));
 		tglbtnMagic.setHorizontalAlignment(SwingConstants.LEADING);
 		toolBarLeft.add(tglbtnMagic);
+
+		btnInfo = new JButton("<html>Info</html>");
+		btnInfo.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/info_hover_x32.png")));
+		btnInfo.setRolloverEnabled(true);
+		btnInfo.setPressedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/info_active_x32.png")));
+		btnInfo.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/info_x32.png")));
+		btnInfo.setHorizontalAlignment(SwingConstants.LEADING);
+		toolBarLeft.add(btnInfo);
 
 		toolBarLeft.addSeparator();
 
@@ -274,6 +323,7 @@ public class MainGUI
 		frame.getContentPane().add(physUniverse, BorderLayout.CENTER);
 
 		JToolBar toolBarTop = new JToolBar();
+		toolBarTop.setMargin(new Insets(0, 5, 0, 5));
 		frame.getContentPane().add(toolBarTop, BorderLayout.NORTH);
 
 		JPanel panel = new JPanel();
@@ -393,6 +443,8 @@ public class MainGUI
 			public void actionPerformed(ActionEvent e)
 			{
 				clearCanvas();
+				tglbtnToolAddBody.setSelected(false);
+				tglbtnToolDeleteBody.setSelected(false);
 			}
 		});
 
@@ -408,6 +460,21 @@ public class MainGUI
 			}
 		});
 
+		btnInfo.addActionListener(new ActionListener()
+		{
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				if (infoFrame == null)
+				{
+					infoFrame = new InfoFrame("About", infoString,
+							new ImageIcon(MainGUI.class.getResource("/rsc/images/info_x32.png")));
+				}
+				infoFrame.setVisibleRelativeTo(true, frame);
+			}
+		});
+
 		// Magic listener
 		physUniverse.addMouseMotionListener(new MouseMotionAdapter()
 		{
@@ -420,7 +487,7 @@ public class MainGUI
 					magicMass.setPosition(new Vector2D.Double(e.getX(), e.getY()).scale(physMan.DISTANCE_FACTOR));
 
 				}
-				magicObject.setVisible(letTheMagicHappen);
+				setMagicEnabled(letTheMagicHappen);
 			}
 		});
 
@@ -479,6 +546,18 @@ public class MainGUI
 
 		physUniverse.addObject(magicObject);
 		physMan.addToTickScheduler(magicObject);
+	}
+
+	private void setMagicEnabled(boolean enabled)
+	{
+		// In case the canvas was cleared, re-add pseudoObj
+		if (!physUniverse.getObjects().contains(magicObject))
+		{
+			physUniverse.addObject(magicObject);
+			physMan.addToTickScheduler(magicObject);
+		}
+
+		magicObject.setVisible(enabled);
 	}
 
 	public void addPhysObject(double mass, int x, int y, boolean fixed)
