@@ -597,6 +597,13 @@ public abstract class Vector2D implements Cloneable
 		return this;
 	}
 
+	public Vector2D rotate(double angle)
+	{
+		double cos = Math.cos(angle);
+		double sin = Math.sin(angle);
+		return new Vector2D.Double(cos * getX() - sin * getY(), sin * getX() + cos * getY());
+	}
+
 	/**
 	 * Creates a new object of the same class and with the
 	 * same contents as this object.

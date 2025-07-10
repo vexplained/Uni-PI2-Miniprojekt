@@ -12,6 +12,8 @@ import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.ButtonGroup;
@@ -68,6 +70,14 @@ public class MainGUI
 	private JRadioButton rdbtnPause;
 	private JToggleButton tglbtnToolAddBody, tglbtnToolDeleteBody;
 
+	// I know, static variables are bad practise
+	private static boolean letTheMagicHappen = false;
+	private DynamicPhysicsObject<DynCenteredEllipse, PhysPointMass> magicObject;
+
+	private JToggleButton tglbtnChangeRule;
+
+	private PhysPointMass magicMass;
+
 	/**
 	 * Launch the application.
 	 */
@@ -113,6 +123,8 @@ public class MainGUI
 	{
 		this.physMan = physUniverse.createPhysicsManager();
 		setupExample();
+
+		setupMagic();
 	}
 
 	private void setupExample()
@@ -218,7 +230,7 @@ public class MainGUI
 
 		toolBarLeft.addSeparator();
 
-		JToggleButton tglbtnChangeRule = new JToggleButton("<html>Change magic rule</html>");
+		tglbtnChangeRule = new JToggleButton("<html>Change magic rule</html>");
 		tglbtnChangeRule.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_x32.png")));
 		tglbtnChangeRule
 				.setSelectedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/magic_icon_colorful_x32.png")));
@@ -323,6 +335,36 @@ public class MainGUI
 			}
 		});
 
+		tglbtnChangeRule.addChangeListener(new ChangeListener()
+		{
+
+			@Override
+			public void stateChanged(ChangeEvent e)
+			{
+				letTheMagicHappen = tglbtnChangeRule.isSelected();
+				if (letTheMagicHappen)
+				{
+					magicMass.setMass(-1E30);
+				} else
+				{
+					magicMass.setMass(0);
+				}
+			}
+		});
+
+		physUniverse.addMouseMotionListener(new MouseMotionAdapter()
+		{
+
+			@Override
+			public void mouseMoved(MouseEvent e)
+			{
+				if (letTheMagicHappen)
+				{
+					magicMass.setPosition(new Vector2D.Double(e.getX(), e.getY()).scale(physMan.DISTANCE_FACTOR));
+				}
+			}
+		});
+
 		// =====================================
 		// Listeners for interacting with canvas
 		// =====================================
@@ -343,6 +385,19 @@ public class MainGUI
 		tglbtnToolAddBody.addActionListener(alTool);
 		tglbtnToolDeleteBody.addActionListener(alTool);
 
+	}
+
+	private void setupMagic()
+	{
+		magicMass = new PhysPointMass(0);
+		magicMass.setFixed(true);
+		DynCenteredEllipse magicBody = new DynCenteredEllipse(Color.WHITE, 0, 0, 10, 10);
+
+		magicObject = new DynamicPhysicsObject<DynCenteredEllipse, PhysPointMass>(magicBody, magicMass,
+				physMan.DISTANCE_FACTOR);
+
+		physUniverse.addObject(magicObject);
+		physMan.addToTickScheduler(magicObject);
 	}
 
 	public void addPhysObject(double mass, int x, int y, boolean fixed)
@@ -411,6 +466,24 @@ public class MainGUI
 	{
 		return Math.pow(Math.log1p(mass / 1E5), 1.1);
 	}
+
+	/**
+	 * @return the letTheMagicHappen
+	 */
+	public static boolean isLetTheMagicHappen()
+	{
+		return letTheMagicHappen;
+	}
+
+	/**
+	 * @param letTheMagicHappen
+	 *            the letTheMagicHappen to set
+	 */
+	public static void setLetTheMagicHappen(boolean letTheMagicHappen)
+	{
+		MainGUI.letTheMagicHappen = letTheMagicHappen;
+	}
+
 }
 
 /**

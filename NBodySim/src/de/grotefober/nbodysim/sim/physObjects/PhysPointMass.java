@@ -34,6 +34,15 @@ public class PhysPointMass extends PhysicsObject
 	{
 		// r_2 - r_1 (=> sign determines direction)
 		Vector2D diff = other.getPosition().subtract(this.getPosition());
+
+		// if (MainGUI.isLetTheMagicHappen())
+		// {
+		// // diff = diff.rotate(Math.PI / 2D);
+		//
+		// return diff.scale(PhysicsConstants.G * this.getMass() * other.getMass()
+		// / Vector2DUtils.distCubed(other.getPosition(), this.getPosition()));
+		// }
+
 		// (F = c / r^2 e_r = c / r^3 * r_vector)
 		return diff.scale(PhysicsConstants.G * this.getMass() * other.getMass()
 				/ Vector2DUtils.distCubed(other.getPosition(), this.getPosition())); // distCubed since we are scaling
