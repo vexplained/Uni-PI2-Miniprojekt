@@ -60,7 +60,7 @@ public class InteractionController
 
 		PhysicsObject physShadow = new PhysPointMass(0);
 
-		double diameter = MainGUI.radiusFromMass(DEFAULT_MASS) * 2;
+		double diameter = MainGUI.radiusFromMass(DEFAULT_MASS, physMan.DISTANCE_FACTOR) * 2;
 		pseudoBody = new DynCenteredEllipse(PSEUDO_COLOR, 0, 0, diameter, diameter);
 		pseudoBody.setFill(PSEUDO_COLOR);
 		pseudoArrow = new DynArrow(MainGUI.COLOR_VELOCITY, 0, 0, 0, 0);
@@ -225,7 +225,7 @@ public class InteractionController
 	{
 		double scaleFactor = Math.pow(1.2, mouseWheelCounter);
 		this.mass = DEFAULT_MASS * scaleFactor;
-		double diameterNew = MainGUI.radiusFromMass(mass) * 2;
+		double diameterNew = MainGUI.radiusFromMass(mass, physMan.DISTANCE_FACTOR) * 2;
 		pseudoBody.setSize(diameterNew, diameterNew);
 	}
 

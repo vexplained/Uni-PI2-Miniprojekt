@@ -83,9 +83,9 @@ public class MainGUI
 	private PhysPointMass magicMass;
 
 	private JButton btnReset;
-
 	private JButton btnClear;
 	private JButton btnInfo;
+	private JButton btnSolarSystem;
 
 	private InfoFrame infoFrame;
 
@@ -161,6 +161,7 @@ public class MainGUI
 	private void initPhysics()
 	{
 		this.physMan = physUniverse.createPhysicsManager();
+		sliderSimSpeed.setValue((int) physMan.getSimulationTimeStep());
 		setupExample();
 
 		setupMagic();
@@ -180,25 +181,61 @@ public class MainGUI
 		double leftTop = borderOffset + center - spacing / 2;
 		double rightBottom = borderOffset + center + spacing / 2;
 
-		double speedFac = 0.008;
-		double initialVel = 250 * speedFac;
+		double initialVel = -15E3; // km/s
 
 		addPhysObject(massEarth, new Vector2D.Double(leftTop, leftTop).scale(physMan.DISTANCE_FACTOR),
-				new Vector2D.Double(initialVel, -initialVel).scale(physMan.DISTANCE_FACTOR),
+				new Vector2D.Double(initialVel, -initialVel),
 				false);
 		addPhysObject(massEarth, new Vector2D.Double(rightBottom, leftTop).scale(physMan.DISTANCE_FACTOR),
-				new Vector2D.Double(initialVel, initialVel).scale(physMan.DISTANCE_FACTOR),
+				new Vector2D.Double(initialVel, initialVel),
 				false);
 		addPhysObject(massEarth, new Vector2D.Double(rightBottom, rightBottom).scale(physMan.DISTANCE_FACTOR),
-				new Vector2D.Double(-initialVel, initialVel).scale(physMan.DISTANCE_FACTOR),
+				new Vector2D.Double(-initialVel, initialVel),
 				false);
 		addPhysObject(massEarth, new Vector2D.Double(leftTop, rightBottom).scale(physMan.DISTANCE_FACTOR),
-				new Vector2D.Double(-initialVel, -initialVel).scale(physMan.DISTANCE_FACTOR),
+				new Vector2D.Double(-initialVel, -initialVel),
 				false);
 
 		addPhysObject(massSun,
 				new Vector2D.Double(borderOffset + center, borderOffset + center).scale(physMan.DISTANCE_FACTOR), false,
 				COLOR_SUN);
+	}
+
+	private void setupExSolarSystem()
+	{
+		// Sonne, Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus, Neptun
+		final double[] masses = { 1.989E30, 3.3E23, 4.87E24, 5.97E24, 6.42E23, 1.9E27, 5.68E26, 8.68E25, 1.02E26 }; // kg
+		final double[] distances = { 0, 0.39, 0.72, 1, 1.52, 5.20, 9.58, 19.2, 30.05 }; // AU
+		final double[] vels = { 0, 47.36, 35.02, 29.78, 24.07, 13.07, 9.69, 6.80, 5.43 }; // km/s
+
+		final double AU = 149.6E9; // m
+		// final double speedFac = 1.2E8; // to get km/s (cheated ;))
+		final double speedFac = 1E3; // to get km/s
+
+		final double xC = 500 * physMan.DISTANCE_FACTOR, yC = 400 * physMan.DISTANCE_FACTOR; // center
+
+		addPhysObject(masses[0], new Vector2D.Double(xC, yC), false, COLOR_SUN);
+		for (int i = 1; i < masses.length; i++)
+		{
+			Color color = COLOR_OBJECT_DEFAULT;
+			if (i == 3)
+			{
+				color = new Color(0x00BF4A);
+			}
+
+			Vector2D pos = new Vector2D.Double(distances[i] * AU + xC,
+					yC);
+			Vector2D vel = new Vector2D.Double(0, vels[i] * speedFac);
+			addPhysObject(masses[i], pos, vel, false, color);
+			System.out.println(pos);
+		}
+
+		final double mMoon = 7.35E22,
+				dMoon = 384_000_000;
+		Vector2D pMoon = new Vector2D.Double(distances[3] * AU + dMoon + xC, yC);
+		Vector2D vMoon = new Vector2D.Double(0, (vels[3] - 1.023) * speedFac); // vEarth + vMoon
+		System.out.println("moon: " + pMoon);
+		addPhysObject(mMoon, pMoon, vMoon, false, new Color(0x888888));
 	}
 
 	/**
@@ -319,6 +356,16 @@ public class MainGUI
 		btnClear.setHorizontalAlignment(SwingConstants.LEADING);
 		toolBarLeft.add(btnClear);
 
+		toolBarLeft.addSeparator();
+
+		btnSolarSystem = new JButton("<html>Solar system</html>");
+		// btnClear.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_x32.png")));
+		btnSolarSystem.setRolloverEnabled(true);
+		// btnClear.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_hover_x32.png")));
+		// btnClear.setPressedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_red_x32.png")));
+		btnSolarSystem.setHorizontalAlignment(SwingConstants.LEADING);
+		toolBarLeft.add(btnSolarSystem);
+
 		physUniverse = new PhysicsUniverse2D();
 		frame.getContentPane().add(physUniverse, BorderLayout.CENTER);
 
@@ -345,12 +392,12 @@ public class MainGUI
 
 		sliderSimSpeed = new LogarithmicJSlider();
 		sliderSimSpeed.setMinimum(1);
-		sliderSimSpeed.setMaximum(50);
-		sliderSimSpeed.setValue(2);
+		sliderSimSpeed.setMaximum(200000);
+		sliderSimSpeed.setValue(1000);
 		sliderSimSpeed.setPaintTicks(true);
 		sliderSimSpeed.setPaintLabels(true);
-		sliderSimSpeed.setMinorTickSpacing(1);
-		sliderSimSpeed.setMajorTickSpacing(11);
+		sliderSimSpeed.setMinorTickSpacing(100);
+		sliderSimSpeed.setMajorTickSpacing(1000);
 		GridBagConstraints gbc_sliderSimSpeed = new GridBagConstraints();
 		gbc_sliderSimSpeed.fill = GridBagConstraints.HORIZONTAL;
 		gbc_sliderSimSpeed.gridx = 0;
@@ -443,8 +490,6 @@ public class MainGUI
 			public void actionPerformed(ActionEvent e)
 			{
 				clearCanvas();
-				tglbtnToolAddBody.setSelected(false);
-				tglbtnToolDeleteBody.setSelected(false);
 			}
 		});
 
@@ -472,6 +517,17 @@ public class MainGUI
 							new ImageIcon(MainGUI.class.getResource("/rsc/images/info_x32.png")));
 				}
 				infoFrame.setVisibleRelativeTo(true, frame);
+			}
+		});
+
+		btnSolarSystem.addActionListener(new ActionListener()
+		{
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				clearCanvas();
+				setupExSolarSystem();
 			}
 		});
 
@@ -523,6 +579,9 @@ public class MainGUI
 	private void clearCanvas()
 	{
 		rdbtnPause.doClick();
+
+		tglbtnToolAddBody.setSelected(false);
+		tglbtnToolDeleteBody.setSelected(false);
 
 		try
 		{
@@ -594,7 +653,7 @@ public class MainGUI
 		physObj.setVelocity(initalVelocity);
 
 		// Scale objects with 10x mass to 1.5x the radius
-		double radius = radiusFromMass(mass);
+		double radius = radiusFromMass(mass, physMan.DISTANCE_FACTOR);
 		// double radius = Math.pow(2, Math.log10(mass / 1E20));
 
 		// Position of these objects doesn't matter; only set pos of DynCompoundObject
@@ -622,9 +681,10 @@ public class MainGUI
 		physMan.addToTickScheduler(dynPhysObj);
 	}
 
-	public static double radiusFromMass(double mass)
+	public static double radiusFromMass(double mass, double scaleFactor)
 	{
-		return Math.pow(Math.log1p(mass / 1E5), 1.1);
+		// return Math.pow(mass, 0.28D) * 5.9722E24 / Math.pow(scaleFactor, 3.5);
+		return Math.pow(Math.log1p(mass / scaleFactor), 1.1) / 3D;
 	}
 
 	/**
