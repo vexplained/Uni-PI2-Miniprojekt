@@ -8,7 +8,8 @@ public final class PhysicsConstants
 	 */
 	// public static final double G = 6.67430e-11D;
 	// FIXME correct in prod
-	public static final double G = 1D;
+	// public static final double G = 1D;
+	public static final double G = 6.67430e-11D;
 
 	/**
 	 * Astronomical unit, in meters.

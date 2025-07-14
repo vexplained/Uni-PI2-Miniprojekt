@@ -27,14 +27,13 @@ public class PhysicsManager extends ObjectManager
 	/**
 	 * Factor to multiply pixel distances by to get "real" distances.
 	 * 
-	 * The value of <code>1E9</code> results in each pixel representing <b>one million kilometers</b>.
+	 * For instance, a value of <code>1E9</code> results in each pixel representing <b>one million kilometers</b>.
 	 */
 	public final double DISTANCE_FACTOR = 1E9;
 
 	/**
 	 * Acceleration limit (absolute value) to prevent objects flying outside the rendered region when approaching each
-	 * other
-	 * closely.
+	 * other closely.
 	 * TODO: Fix grammar in this doc ;)
 	 */
 	public final double ACCEL_CAP = 1E9;
@@ -44,7 +43,7 @@ public class PhysicsManager extends ObjectManager
 	 * closely.
 	 * TODO: Fix grammar in this doc ;)
 	 */
-	public final double VELOCITY_CAP = 1E10;
+	public final double VELOCITY_CAP = DISTANCE_FACTOR * 1E2;
 
 	/**
 	 * Instantiates a new {@link PhysicsManager} using the given universe and a simulation time step of 1/60 s.
@@ -55,7 +54,7 @@ public class PhysicsManager extends ObjectManager
 		// Create copy of physUniverse set
 		this.universe = Collections.synchronizedSet(physUniverse.getDynPhysicsObjects());
 		this.physicsShadows = Collections.synchronizedSet(new HashSet<>(this.universe.size()));
-		this.simulationTimeStep = 1d;
+		this.simulationTimeStep = 50_000d; // simulate 50_000 second per frame
 	}
 
 	public double getSimulationTimeStep()
