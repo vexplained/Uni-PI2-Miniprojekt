@@ -360,10 +360,10 @@ public class MainGUI
 		toolBarLeft.addSeparator();
 
 		btnSolarSystem = new JButton("<html>Solar system</html>");
-		// btnClear.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_x32.png")));
+		btnSolarSystem.setIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/earth_x32.png")));
 		btnSolarSystem.setRolloverEnabled(true);
-		// btnClear.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_hover_x32.png")));
-		// btnClear.setPressedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/trash_red_x32.png")));
+		btnSolarSystem.setRolloverIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/earth_hover_x32.png")));
+		btnSolarSystem.setPressedIcon(new ImageIcon(MainGUI.class.getResource("/rsc/images/earth_colorful_x32.png")));
 		btnSolarSystem.setHorizontalAlignment(SwingConstants.LEADING);
 		toolBarLeft.add(btnSolarSystem);
 
