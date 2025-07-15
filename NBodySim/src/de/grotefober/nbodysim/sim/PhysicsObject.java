@@ -151,7 +151,7 @@ public abstract class PhysicsObject implements PhysHeavyMass, PhysInertialMass, 
 
 		if (MainGUI.isLetTheMagicHappen())
 		{
-			forceResult.scale(-1);
+			// forceResult.scale(-1);
 		}
 
 		updateAcceleration(new Vector2D.Double(forceResult), physMan.ACCEL_CAP); // "remove" mutable properties
