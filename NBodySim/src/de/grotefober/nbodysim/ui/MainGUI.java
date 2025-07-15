@@ -32,6 +32,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.grotefober.nbodysim.sim.PhysicsConstants;
 import de.grotefober.nbodysim.sim.PhysicsManager;
 import de.grotefober.nbodysim.sim.PhysicsObject;
 import de.grotefober.nbodysim.sim.Vector2D;
@@ -51,8 +52,8 @@ public class MainGUI
 	/**
 	 * Factor to scale displayed vector by. This is purely for aesthetics.
 	 */
-	public static final double SCALE_FACTOR_ACC = 1000D,
-			SCALE_FACTOR_VEL = 100D;
+	public static final double SCALE_FACTOR_ACC = 1E3 / PhysicsConstants.G,
+			SCALE_FACTOR_VEL = 5E6;
 
 	public static Color COLOR_OBJECT_DEFAULT = new Color(0x02B0E6),
 			COLOR_SUN = new Color(0xF5B952),
